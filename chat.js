@@ -1,32 +1,33 @@
-/* chat.js - "Ask me" box for the portfolio.
-   Answers come ONLY from window.PORTFOLIO_KB (kb.js, generated from the master resume and story).
-   Retrieval runs in the browser (no server, no keys, no cost). Voice input uses Whisper (open source) in the
-   browser through transformers.js; if that cannot load, the browser's own speech recognition is offered.
-   Optional: set window.PORTFOLIO_CHAT.endpoint to a Cloudflare Worker (see chat-worker/) and the same
-   retrieved passages are sent to an open model there to phrase the answer; the local answer is the fallback. */
+/* chat.js - conversational "Ask me" box for the portfolio.
+   Knowledge: window.PORTFOLIO_KB (kb.js, generated from the master resume and story). Nothing else.
+   Answers are composed in the browser as first-person sentences from the matching passages (no server, no keys).
+   Voice in: Whisper (open source) in the browser via transformers.js, browser recognizer as fallback.
+   Voice out: the browser's speech synthesis, on by default after a spoken question, toggle in the header.
+   Optional: window.PORTFOLIO_CHAT.endpoint (chat-worker/) lets an open model phrase the reply from the same passages. */
 (function () {
   'use strict';
   var KB = window.PORTFOLIO_KB || [];
   var CFG = window.PORTFOLIO_CHAT || {};
   if (!KB.length || !document.body) { return; }
 
-  /* ---------- tiny text tools ---------- */
+  /* ---------- text tools ---------- */
   var STOP = {};
-  'a an the and or of to in on at for with by from as is are was were be been i my me you your he she it we they this that these those do does did have has had what which who whom whose how when where why can could would should will shall about tell say give show list some any much many more most very really please thanks thank'
+  'a an the and or of to in on at for with by from as is are was were be been i my me you your he she it we they this that these those do does did have has had what which who whom whose how when where why can could would should will shall about tell say give show list some any much many more most very really please thanks thank familiar know ever'
     .split(' ').forEach(function (w) { STOP[w] = 1; });
   var SYN = {
     experience: ['years', 'worked', 'background', 'career', 'history'], years: ['experience', 'long'],
     email: ['contact', 'reach', 'mail'], contact: ['email', 'phone', 'reach', 'linkedin'], phone: ['contact', 'number', 'call'],
     degree: ['education', 'university', 'school', 'masters', 'bachelor'], education: ['degree', 'university', 'school', 'fiu', 'studied'],
     certification: ['certified', 'certs', 'certificate', 'aws', 'security'], certifications: ['certified', 'certs', 'certificate'],
-    skills: ['stack', 'tools', 'technologies', 'know', 'languages'], stack: ['skills', 'tools', 'technologies'],
+    skills: ['stack', 'tools', 'technologies', 'languages'], stack: ['skills', 'tools', 'technologies'],
     job: ['role', 'position', 'work', 'company'], role: ['job', 'position', 'title'], current: ['present', 'now', 'today', 'latest'],
     company: ['employer', 'worked', 'role'], project: ['projects', 'built', 'side', 'jobhub'], projects: ['project', 'built', 'jobhub'],
     achievement: ['achievements', 'proud', 'impact', 'result', 'results', 'improved', 'cut'], biggest: ['achievement', 'impact', 'proud'],
-    remote: ['hybrid', 'relocate', 'relocation', 'onsite', 'location', 'where'], location: ['based', 'live', 'miami', 'remote', 'where'],
+    remote: ['hybrid', 'relocate', 'relocation', 'onsite', 'location'], location: ['based', 'live', 'miami', 'remote'],
     available: ['availability', 'start', 'notice', 'join'], start: ['available', 'availability', 'notice'],
     snowflake: ['warehouse'], aws: ['cloud', 'glue', 'lambda', 'step'], python: ['pyspark', 'languages', 'programming'], sql: ['database', 'queries'],
-    streaming: ['kafka', 'kinesis', 'event'], ai: ['llm', 'claude', 'genai', 'chatbot', 'mcp', 'agents'], llm: ['ai', 'claude', 'genai'],
+    streaming: ['kafka', 'kinesis', 'event'], ai: ['llm', 'llms', 'claude', 'genai', 'chatbot', 'mcp', 'agents', 'models'], llm: ['ai', 'claude', 'genai'], llms: ['ai', 'claude', 'genai', 'llm'],
+    model: ['models', 'ai', 'llm'], models: ['ai', 'llm', 'claude'],
     healthcare: ['hipaa', 'phi', 'mindtree'], security: ['cybersecurity', 'hipaa', 'iam', 'kms', 'rbac', 'masking'],
     performance: ['faster', 'optimized', 'query', 'bottleneck', 'slow'], migration: ['modernized', 'legacy', 'ssis', 'iceberg'],
     pipeline: ['pipelines', 'etl', 'glue', 'airflow', 'dbt'], etl: ['pipeline', 'ssis', 'glue', 'dbt']
@@ -38,15 +39,13 @@
       .map(function (w) { return w.length > 4 && /s$/.test(w) && !/ss$/.test(w) ? w.slice(0, -1) : w; });
   }
   var DOCS = KB.map(function (c) {
-    var t = tokens(c.text + ' ' + c.role + ' ' + c.section);
-    var tf = {};
+    var t = tokens(c.text + ' ' + c.role + ' ' + c.section), tf = {};
     t.forEach(function (w) { tf[w] = (tf[w] || 0) + 1; });
     return { c: c, tf: tf, len: t.length };
   });
   var DF = {};
   DOCS.forEach(function (d) { Object.keys(d.tf).forEach(function (w) { DF[w] = (DF[w] || 0) + 1; }); });
   var AVG = DOCS.reduce(function (a, d) { return a + d.len; }, 0) / DOCS.length;
-  // Tool names = every token on the skills lists, minus generic words. Maps token -> display name.
   var GENERIC = {};
   'data pipeline pipelines engineering modeling model models check checks quality access monitoring integration platform platforms warehousing warehouse cloud security governance analytics streaming batch event driven incremental patterns ingestion api apis rest saas handling masking lineage freshness functions encryption least privilege control controls catalog server servers window skill skills defend interview can and with for the of in'
     .split(' ').forEach(function (w) { GENERIC[w] = 1; });
@@ -58,8 +57,8 @@
     });
   });
   function expand(q) {
-    var base = tokens(q), out = {};
-    base.forEach(function (w) {
+    var out = {};
+    tokens(q).forEach(function (w) {
       out[w] = Math.max(out[w] || 0, 1);
       (SYN[w] || []).forEach(function (s) { out[s] = Math.max(out[s] || 0, 0.55); });
     });
@@ -79,94 +78,155 @@
     scored.sort(function (a, b) { return b.s - a.s; });
     return scored.slice(0, k || 4);
   }
-
-  /* ---------- intents: crisp first sentence for the common questions ---------- */
+  var OUTCOME = /%|\d+B-row|billion|\d+ hours to \d+|from \d+ hours|450M|50\+|10-year/;
+  var KIND_W = { bullet: 1.0, project: 1.0, story: 0.9, role: 0.6, fact: 0.6, skills: 0.4, goals: 0.4, availability: 0.4, contact: 0.3, years: 0.5, certs: 0.6, education: 0.6 };
+  function rerank(list) {
+    list.forEach(function (h) {
+      h.s *= (KIND_W[h.c.kind] || 0.8);
+      if (OUTCOME.test(h.c.text)) { h.s *= 2.0; } else if (/\d/.test(h.c.text) && h.c.kind !== 'skills') { h.s *= 1.15; }
+    });
+    list.sort(function (a, b) { return b.s - a.s; });
+    return list;
+  }
   function byKind(kind) { return KB.filter(function (c) { return c.kind === kind; }); }
+  function dedupe(list) {
+    var out = [];
+    list.forEach(function (c) {
+      var body = c.text.replace(/^At [^:]+: /, '');
+      if (!out.some(function (o) { return similar(o.text.replace(/^At [^:]+: /, ''), body) > 0.45; })) { out.push(c); }
+    });
+    return out;
+  }
+
+  /* ---------- turning passages into first-person sentences ---------- */
+  var COMPANY_SHORT = { 'Tech Detectives Inc.': 'Tech Detectives', 'Triangulum Insights': 'Triangulum', 'Mindtree': 'Mindtree' };
+  var PRESENT = /^(Own|Write|Maintain|Manage|Monitor|Run|Support|Build|Handle|Lead|Design|Develop|Operate|Provision|Release)\b/;
+  function sentence(c, withCompany) {
+    var m = /^At ([^:]+): (.*)$/.exec(c.text), company = m ? (COMPANY_SHORT[m[1]] || m[1]) : '', body = m ? m[2] : c.text;
+    body = body.replace(/\s+/g, ' ').trim().replace(/\.$/, '');
+    var first = body.split(' ')[0], rest = body.slice(first.length);
+    var verb = /^[A-Z][a-z]+$/.test(first) ? first.toLowerCase() : first;   // "Cut query time" -> "cut query time"; "SQL ..." stays
+    var s = 'I ' + verb + rest;
+    if (withCompany && company) { s = 'At ' + company + ' ' + s; }
+    return s + '.';
+  }
+  function similar(a, b) {
+    var ta = {}, n = 0, u = 0; tokens(a).forEach(function (w) { ta[w] = 1; });
+    var tb = {}; tokens(b).forEach(function (w) { tb[w] = 1; });
+    Object.keys(ta).forEach(function (w) { u++; if (tb[w]) { n++; } });
+    Object.keys(tb).forEach(function (w) { if (!ta[w]) { u++; } });
+    return u ? n / u : 0;
+  }
+  function skillsSentence(c) {
+    var m = /^([^:]+): (.*)$/.exec(c.text); if (!m) { return c.text; }
+    var cat = m[1], items = m[2].replace(/\.$/, '');
+    var lead = /AWS/i.test(cat) ? 'On AWS I have worked with ' : /GenAI|LLM/i.test(cat) ? 'On the AI side I have built with ' : /Stream/i.test(cat) ? 'For streaming and integration I have used ' :
+      /Platform|Warehous/i.test(cat) ? 'The platforms I have run are ' : /Infra|DevOps/i.test(cat) ? 'For infrastructure and delivery I use ' : /Security|Govern/i.test(cat) ? 'For security and governance I have applied ' :
+      /defend/i.test(cat) ? 'Tools I can speak to in depth include ' : 'My ' + cat.toLowerCase() + ' work covers ';
+    return lead + items + '.';
+  }
+  function joinProse(chunks, withCompany) {
+    var last = '';
+    return dedupe(chunks).slice(0, 2).map(function (c) {
+      if (c.kind === 'skills') { return skillsSentence(c); }
+      var co = companyOf(c), s = sentence(c, withCompany && co !== last); last = co; return s;
+    }).join(' ');
+  }
+  function lowerFirst(s) { return /^I\b/.test(s) ? s : s.charAt(0).toLowerCase() + s.slice(1); }
+  function companyOf(c) { var m = /^At ([^:]+):/.exec(c.text); return m ? (COMPANY_SHORT[m[1]] || m[1]) : ''; }
+
+  function roleSentence(r, lead) {
+    // "Data Engineer at Tech Detectives Inc., Miami, FL, February 2025 – Present." -> "I'm a Data Engineer at Tech Detectives in Miami, since February 2025."
+    var m = /^(.+?) at (.+?)(?:, ([^,]+, [A-Z]{2}|Remote|India))?, (\w+ \d{4}) – (\w+ \d{4}|Present)\.?$/.exec(r.text);
+    if (!m) { return lead + ' ' + r.text; }
+    var art = /^[aeiou]/i.test(m[1]) || /^SSIS/.test(m[1]) ? 'an' : 'a', co = COMPANY_SHORT[m[2]] || m[2];
+    var where = m[3] ? (m[3] === 'Remote' ? ', fully remote' : ' in ' + m[3].replace(/, [A-Z]{2}$/, '')) : '';
+    var when = m[5] === 'Present' ? ', since ' + m[4] : ', from ' + m[4] + ' to ' + m[5];
+    return lead + ' ' + art + ' ' + m[1] + ' at ' + co + where + when + '.';
+  }
+
+  /* ---------- intents ---------- */
+  var YESNO = /^(are|do|did|have|has|can|could|would|is|were|was)\b/i;
   var INTENTS = [
-    { rx: /\b(who are you|about you|introduce|yourself|what do you do)\b/i, kind: 'profile', pick: function () { return byKind('fact').slice(0, 1).concat(byKind('years')); } },
-    { rx: /\b(how (many|much) years|years of experience|how long|experience do you have)\b/i, pick: function () { return byKind('years'); } },
-    { rx: /\b(email|phone|contact|reach you|linkedin|get in touch)\b/i, pick: function () { return byKind('contact'); } },
-    { rx: /\b(available|availability|notice|when can you (start|join)|start date)\b/i, pick: function () { return byKind('availability'); } },
-    { rx: /\b(remote|hybrid|onsite|on-site|relocat|where (are you|do you live)|based)\b/i, pick: function () { return byKind('availability').concat(byKind('fact').slice(0, 1)); } },
-    { rx: /\b(looking for|open to|what roles|kind of role|next role|ideal role)\b/i, pick: function () { return byKind('goals'); } },
-    { rx: /\b(certif|certified|security\+|solutions architect)\b/i, pick: function () { return byKind('certs'); } },
-    { rx: /\b(which|what|list) (aws|cloud) (services|tools|products)\b/i, pick: function () { return KB.filter(function (c) { return c.kind === 'skills' && /^AWS/.test(c.text); }).slice(0, 1); } },
-    { rx: /\b(education|degree|university|college|school|master|bachelor|study|studied)\b/i, pick: function () { return byKind('education'); } },
-    { rx: /\b(current (role|job|company|position)|where do you work|work now|present role)\b/i, pick: function () { return KB.filter(function (c) { return c.kind === 'role'; }).slice(0, 1); } },
-    { rx: /\b(jobhub|side project|projects?)\b/i, pick: function () { return byKind('project'); } },
-    { rx: /\b(why (should we|hire)|strengths?|pitch|sell yourself|what makes you|stand out|best at)\b/i, pick: function () {
-        var hero = KB.filter(function (c) { return /17B|18 hours/.test(c.text) && c.kind === 'bullet'; }).slice(0, 2);
-        return byKind('fact').slice(0, 1).concat(hero, byKind('certs'));
+    { rx: /\b(who are you|about you|introduce|yourself|what do you do|tell me about you)\b/i, run: function () {
+        var y = byKind('years')[0], hero = KB.filter(function (c) { return c.kind === 'bullet' && /17B|18 hours/.test(c.text); }).slice(0, 2);
+        return "I'm Prashanth, a data engineer in Miami. " + (y ? y.text : '') + ' Most recently, ' + lowerFirst(joinProse(hero, false));
       } },
-    { rx: /\b(tech detectives|triangulum|mindtree)\b/i, pick: function (q) {
+    { rx: /\b(how (many|much) years|years of experience|how long|experience do you have|how experienced)\b/i, run: function () { return byKind('years')[0].text; } },
+    { rx: /\b(email|phone|contact|reach you|linkedin|get in touch|hire you how|talk to you)\b/i, run: function () { return byKind('contact')[0].text; } },
+    { rx: /\b(available|availability|notice|when can you (start|join)|start date)\b/i, run: function () { return byKind('availability')[0].text; } },
+    { rx: /\b(remote|hybrid|onsite|on-site|relocat\w*|where (are you|do you live)|based)\b/i, run: function () { return byKind('availability')[0].text; } },
+    { rx: /\b(looking for|open to|what roles|kind of role|next role|ideal role|what are you after)\b/i, run: function () { return byKind('goals')[0].text; } },
+    { rx: /certif|security\+|solutions architect/i, run: function () { return 'Two: ' + byKind('certs')[0].text.replace(/^Certifications: /, '').replace(/\.$/, '') + '. The security one is not decoration; it is how I approach pipeline design.'; } },
+    { rx: /\b(education|degree|university|college|school|master|bachelor|study|studied)\b/i, run: function () {
+        var e = byKind('education'); return 'I have ' + e.map(function (c) { return c.text.replace(/\.$/, ''); }).join(', and before that ') + '. The master\'s is why security shows up in how I design pipelines.';
+      } },
+    { rx: /\b(current (role|job|company|position)|where do you work|work now|present role|right now)\b/i, run: function () {
+        var r = byKind('role')[0], b = KB.filter(function (c) { return c.kind === 'bullet' && c.role === r.role; }).slice(0, 2);
+        return roleSentence(r, "I'm") + ' ' + joinProse(b, false);
+      } },
+    { rx: /\b(jobhub|side project|projects?|built for yourself)\b/i, run: function () { return byKind('project')[0].text; } },
+    { rx: /\b(why (should we|hire)|strengths?|pitch|sell yourself|what makes you|stand out|best at|good at)\b/i, run: function () {
+        var hero = KB.filter(function (c) { return c.kind === 'bullet' && /17B|18 hours/.test(c.text); }).slice(0, 2);
+        return 'Three things. I ship measurable results: ' + lowerFirst(joinProse(hero, false)) + ' I bring security with me, with an M.S. in Cybersecurity, Security+ and the AWS Solutions Architect certification. And I use AI where it earns its place, from Claude-based checks in CI to the agents that run JobHub.';
+      } },
+    { rx: /\b(ai|llm|llms|genai|gen ai|language models?|machine learning|ml|claude|gpt|openai|agents?|chatbot|mcp)\b/i, run: function (q) {
+        var b = KB.filter(function (c) { return c.kind === 'bullet' && /Claude|MCP|AI-assisted/.test(c.text); }).slice(0, 2);
+        var p = byKind('project')[0];
+        var open = YESNO.test(q) ? 'Yes, hands-on, in production rather than as a demo. ' : '';
+        return open + joinProse(b, true) + ' Outside work I built JobHub, where parallel Claude browser agents fill application forms and a hiring-manager agent reviews each tailored resume. I also use Snowflake Cortex and the Claude and GPT APIs for data-quality and documentation work.' + (p ? '' : '');
+      } },
+    { rx: /\b(tech detectives|triangulum|mindtree)\b/i, run: function (q) {
         var name = /tech detectives/i.test(q) ? 'Tech Detectives' : /triangulum/i.test(q) ? 'Triangulum' : 'Mindtree';
-        var role = KB.filter(function (c) { return c.kind === 'role' && c.role.indexOf(name) === 0; }).slice(0, 1);
+        var role = KB.filter(function (c) { return c.kind === 'role' && c.role.indexOf(name) === 0; })[0];
         var bullets = KB.filter(function (c) { return c.kind === 'bullet' && c.role.indexOf(name) === 0; });
-        bullets.sort(function (a, b) { return (/\d/.test(b.text) ? 1 : 0) - (/\d/.test(a.text) ? 1 : 0); });
-        return role.concat(bullets.slice(0, 2));
+        bullets.sort(function (a, b) { return (OUTCOME.test(b.text) ? 1 : 0) - (OUTCOME.test(a.text) ? 1 : 0); });
+        return (role ? roleSentence(role, name === 'Tech Detectives' ? "I'm" : 'I was') + ' ' : '') + joinProse(bullets.slice(0, 3), false);
       } }
   ];
   var OFF_LIMITS = /\b(visa|sponsor|sponsorship|h-?1b|salary|compensation|pay|rate|how much do you (make|earn)|date of birth|birthday|age|home address|ssn|social security)\b/i;
+  function contactEmail() { var m = /([\w.+-]+@[\w-]+\.[\w.]+)/.exec((byKind('contact')[0] || {}).text || ''); return m ? m[1] : 'prashanthsirusala2209@gmail.com'; }
 
   function answer(q) {
     if (OFF_LIMITS.test(q)) {
-      return { text: 'I keep work authorization and compensation for a direct conversation. Email me at ' + contact().email + ' and I will answer quickly.', refs: [] };
+      return { text: "Those are things I'd rather cover directly than on a web page. Email me at " + contactEmail() + ' and I will answer the same day.', refs: [] };
     }
     for (var i = 0; i < INTENTS.length; i++) {
       if (INTENTS[i].rx.test(q)) {
-        var picked = INTENTS[i].pick(q);
-        if (picked.length) {
-          var extra = search(q, 3).filter(function (r) { return picked.indexOf(r.c) < 0 && r.s > 1.5; }).slice(0, 2);
-          return { text: picked.map(function (c) { return c.text; }).join(' '), refs: extra.map(function (r) { return r.c; }) };
-        }
+        var t = INTENTS[i].run(q);
+        if (t) { return { text: t, refs: [] }; }
       }
     }
-    var miss = { text: "That is not in my resume or story, so I will not guess. Ask me about my roles, the Snowflake and AWS work, skills, education, certifications, JobHub, or how to contact me.", refs: [], miss: true };
-    var OUTCOME = /%|\d+B-row|billion|\d+ hours to \d+|from \d+ hours|450M|50\+|10-year/;
-    var KIND_W = { bullet: 1.0, project: 1.0, story: 0.9, role: 0.6, fact: 0.6, skills: 0.4, goals: 0.4, availability: 0.4, contact: 0.3, years: 0.5, certs: 0.6, education: 0.6 };
-    function rerank(list) {
-      list.forEach(function (h) {
-        h.s *= (KIND_W[h.c.kind] || 0.8);
-        if (OUTCOME.test(h.c.text)) { h.s *= 2.0; }                 // measured outcomes first
-        else if (/\d/.test(h.c.text) && h.c.kind !== 'skills') { h.s *= 1.15; }
-      });
-      list.sort(function (a, b) { return b.s - a.s; });
-      return list;
-    }
-    // A question that names a tool (anything on the skills lists) is answered only from passages that mention
-    // that tool. "Kubernetes in production" is then never answered with a passage that merely says "production".
+    var miss = { text: "Honestly, that is not something in my work history, and I would rather say so than guess. Ask me about the Snowflake and AWS work, the pipelines I run, JobHub, my background, or how to reach me.", refs: [], miss: true };
     var toolTerms = tokens(q).filter(function (w) { return TOOLS[w]; });
     if (toolTerms.length) {
       var holders = DOCS.filter(function (d) { return toolTerms.some(function (w) { return d.tf[w]; }); });
       if (!holders.length) { return miss; }
+      var names = toolTerms.map(function (w) { return TOOLS[w]; }).filter(function (v, i, a) { return a.indexOf(v) === i; }).join(' and ');
       if (holders.every(function (d) { return d.c.kind === 'skills'; })) {
-        var names = toolTerms.map(function (w) { return TOOLS[w]; }).join(' or ');
-        return { text: holders[0].c.text + ' My story does not describe a project built around ' + names + ' specifically, so ask me about it directly if that matters for the role.', refs: [] };
+        return { text: 'I know ' + names + ' and can talk through it, but none of my roles had a project built around it, so I will not oversell that. If it is central to the role, ask me about it directly and I will tell you exactly how far my experience goes.', refs: [] };
       }
       var base = {};
       search(q, 40).forEach(function (h) { base[h.c.id] = h.s; });
-      // keyword score matters less than the kind of passage here: the tool is already guaranteed to be present
-      var ranked = rerank(holders.map(function (d) { return { s: 1 + 0.25 * (base[d.c.id] || 0), c: d.c }; }));
-      return { text: ranked[0].c.text, refs: ranked.slice(1, 3).map(function (h) { return h.c; }) };
+      var ranked = rerank(holders.filter(function (d) { return d.c.kind !== 'skills'; }).map(function (d) { return { s: 1 + 0.25 * (base[d.c.id] || 0), c: d.c }; }));
+      var pick = dedupe(ranked.map(function (h) { return h.c; })).slice(0, 3);
+      var open = YESNO.test(q) ? 'Yes. ' : '';
+      var companies = pick.map(companyOf).filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+      var intro = open + (companies.length > 1 ? 'I have used ' + names + ' at ' + companies.join(' and ') + '. ' : '');
+      return { text: intro + joinProse(pick, companies.length <= 1), refs: [] };
     }
     var hits = search(q, 6);
     if (!hits.length || hits[0].s < 1.2) { return miss; }
     rerank(hits);
-    var top = hits.filter(function (h) { return h.s >= hits[0].s * 0.45; }).slice(0, 3);
-    return { text: top[0].c.text, refs: top.slice(1).map(function (h) { return h.c; }) };
+    var top = dedupe(hits.filter(function (h) { return h.s >= hits[0].s * 0.45; }).map(function (h) { return h.c; })).slice(0, 3);
+    return { text: (YESNO.test(q) ? 'Yes. ' : '') + joinProse(top, true), refs: [] };
   }
-  window.PORTFOLIO_CHAT_DEBUG = { tokens: tokens, DF: DF, search: search, answer: answer };   // for tests only
-  function contact() {
-    var c = byKind('contact')[0] || { text: '' };
-    var m = /([\w.+-]+@[\w-]+\.[\w.]+)/.exec(c.text);
-    return { email: m ? m[1] : 'prashanthsirusala2209@gmail.com' };
-  }
+  window.PORTFOLIO_CHAT_DEBUG = { tokens: tokens, DF: DF, search: search, answer: answer };
 
-  /* ---------- optional worker (open model phrases the answer from the same passages) ---------- */
+  /* ---------- optional worker ---------- */
   function remoteAnswer(q, local) {
     if (!CFG.endpoint) { return Promise.reject(new Error('no endpoint')); }
-    var ctx = [local.text].concat(local.refs.map(function (c) { return c.text; })).concat(search(q, 6).map(function (h) { return h.c.text; }));
-    var seen = {}, passages = ctx.filter(function (t) { if (seen[t]) { return false; } seen[t] = 1; return true; }).slice(0, 8);
+    var passages = [local.text].concat(search(q, 6).map(function (h) { return h.c.text; })).filter(function (t, i, a) { return a.indexOf(t) === i; }).slice(0, 8);
     var ctrl = new AbortController(); setTimeout(function () { ctrl.abort(); }, 12000);
     return fetch(CFG.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: q, passages: passages }), signal: ctrl.signal })
       .then(function (r) { if (!r.ok) { throw new Error('worker ' + r.status); } return r.json(); })
@@ -175,7 +235,9 @@
 
   /* ---------- UI ---------- */
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
-  var SUGGEST = ['What did you do with Snowflake?', 'How many years of experience do you have?', 'What is JobHub?', 'Which AWS services have you used?', 'What certifications do you hold?', 'How can I contact you?'];
+  var SUGGEST = ['What have you done with Snowflake?', 'Are you familiar with LLMs and AI models?', 'Why should we hire you?', 'What is JobHub?', 'How can I reach you?'];
+  var MIC_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
+  var SPK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>';
   var root = document.createElement('div');
   root.id = 'askme';
   root.innerHTML =
@@ -183,24 +245,23 @@
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
       '<span>Ask me</span></button>' +
     '<section id="askme-panel" class="askme-panel card" role="dialog" aria-modal="false" aria-labelledby="askme-title" hidden>' +
-      '<header class="askme-head"><div><h2 id="askme-title">Ask me about my work</h2>' +
-        '<p>Answers come only from my resume and story. Type, or hold the mic and talk.</p></div>' +
-        '<button id="askme-close" type="button" class="icon-btn" aria-label="Close">&#x2715;</button></header>' +
+      '<header class="askme-head"><h2 id="askme-title">Chat with Prashanth</h2><div class="askme-tools">' +
+        '<button id="askme-speak" type="button" class="icon-btn" aria-label="Read answers aloud" aria-pressed="false" title="Read answers aloud">' + SPK_SVG + '</button>' +
+        '<button id="askme-close" type="button" class="icon-btn" aria-label="Close">&#x2715;</button></div></header>' +
       '<div id="askme-log" class="askme-log" aria-live="polite" aria-relevant="additions"></div>' +
       '<div id="askme-suggest" class="askme-suggest" aria-label="Example questions"></div>' +
       '<form id="askme-form" class="askme-form" autocomplete="off">' +
-        '<label for="askme-input" class="sr-only">Your question</label>' +
-        '<input id="askme-input" type="text" maxlength="300" placeholder="Ask about Snowflake, AWS, JobHub, education..." />' +
-        '<button id="askme-mic" type="button" class="icon-btn" aria-label="Hold to talk" aria-pressed="false" title="Hold to talk (Whisper, runs in your browser)">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>' +
-        '<button type="submit" class="btn btn-primary !py-2 !px-3">Ask</button>' +
+        '<button id="askme-mic" type="button" class="icon-btn askme-mic" aria-label="Talk" aria-pressed="false" title="Tap to talk">' + MIC_SVG + '</button>' +
+        '<label for="askme-input" class="sr-only">Your message</label>' +
+        '<input id="askme-input" type="text" maxlength="300" placeholder="Ask me anything about my work" />' +
+        '<button type="submit" class="btn btn-primary !py-2 !px-3">Send</button>' +
       '</form>' +
       '<p id="askme-status" class="askme-status" aria-live="polite"></p>' +
     '</section>';
   document.body.appendChild(root);
   var openBtn = document.getElementById('askme-open'), panel = document.getElementById('askme-panel'), closeBtn = document.getElementById('askme-close');
   var log = document.getElementById('askme-log'), form = document.getElementById('askme-form'), input = document.getElementById('askme-input');
-  var mic = document.getElementById('askme-mic'), status = document.getElementById('askme-status'), suggest = document.getElementById('askme-suggest');
+  var mic = document.getElementById('askme-mic'), status = document.getElementById('askme-status'), suggest = document.getElementById('askme-suggest'), speakBtn = document.getElementById('askme-speak');
 
   function add(role, html) {
     var el = document.createElement('div'); el.className = 'askme-msg askme-' + role; el.innerHTML = html;
@@ -208,94 +269,111 @@
   }
   function greet() {
     if (log.children.length) { return; }
-    add('bot', '<p>Hi, I am Prashanth. Ask me anything that is on my resume or in my story: the 17B-row Snowflake work, the AWS platforms, JobHub, my education, or how to reach me.</p>');
+    add('bot', "<p>Hi, I'm Prashanth. What would you like to know?</p>");
     suggest.innerHTML = SUGGEST.map(function (s) { return '<button type="button" class="chip">' + esc(s) + '</button>'; }).join('');
   }
   function open() { panel.hidden = false; openBtn.setAttribute('aria-expanded', 'true'); greet(); setTimeout(function () { input.focus(); }, 50); }
-  function close() { panel.hidden = true; openBtn.setAttribute('aria-expanded', 'false'); openBtn.focus(); }
+  function close() { panel.hidden = true; openBtn.setAttribute('aria-expanded', 'false'); stopSpeaking(); openBtn.focus(); }
   openBtn.addEventListener('click', function () { panel.hidden ? open() : close(); });
   closeBtn.addEventListener('click', close);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { close(); } });
-  suggest.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { input.value = b.textContent; form.requestSubmit ? form.requestSubmit() : ask(b.textContent); } });
+  suggest.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { ask(b.textContent); } });
   if (location.hash === '#ask') { open(); }
   document.querySelectorAll('a[href="#ask"]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); open(); }); });
 
-  function render(a, q) {
-    var html = '<p>' + esc(a.text) + '</p>';
-    if (a.refs && a.refs.length) { html += '<details><summary>More from my story</summary><ul>' + a.refs.map(function (c) { return '<li>' + esc(c.text) + '</li>'; }).join('') + '</ul></details>'; }
-    return html;
+  /* ---------- voice out ---------- */
+  var speakOn = false, lastVoiceQuestion = false;
+  function voice() {
+    var vs = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    var pref = ['Google US English', 'Samantha', 'Alex', 'Daniel', 'Microsoft David', 'Microsoft Mark'];
+    for (var i = 0; i < pref.length; i++) { var v = vs.filter(function (x) { return x.name.indexOf(pref[i]) === 0; })[0]; if (v) { return v; } }
+    return vs.filter(function (x) { return /^en[-_]US/i.test(x.lang); })[0] || vs.filter(function (x) { return /^en/i.test(x.lang); })[0] || null;
   }
-  function ask(q) {
+  function speak(text) {
+    if (!window.speechSynthesis) { return; }
+    stopSpeaking();
+    var u = new SpeechSynthesisUtterance(text.replace(/\s+/g, ' ').slice(0, 900));
+    var v = voice(); if (v) { u.voice = v; }
+    u.rate = 1.02; u.pitch = 1;
+    window.speechSynthesis.speak(u);
+  }
+  function stopSpeaking() { if (window.speechSynthesis && window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); } }
+  if (!window.speechSynthesis) { speakBtn.hidden = true; }
+  speakBtn.addEventListener('click', function () { speakOn = !speakOn; speakBtn.setAttribute('aria-pressed', String(speakOn)); if (!speakOn) { stopSpeaking(); } status.textContent = speakOn ? 'I will read my answers aloud.' : ''; setTimeout(function () { if (!speakOn) { status.textContent = ''; } }, 1500); });
+
+  function ask(q, spoken) {
     q = String(q || '').trim(); if (!q) { return; }
     suggest.innerHTML = '';
     add('user', '<p>' + esc(q) + '</p>');
     input.value = '';
+    lastVoiceQuestion = !!spoken;
     var local = answer(q);
-    var el = add('bot', '<p class="askme-thinking">Looking through my story...</p>');
-    remoteAnswer(q, local).then(function (text) {
-      el.innerHTML = '<p>' + esc(text) + '</p>' + (local.refs.length ? '<details><summary>From my story</summary><ul>' + local.refs.map(function (c) { return '<li>' + esc(c.text) + '</li>'; }).join('') + '</ul></details>' : '');
-    }).catch(function () { el.innerHTML = render(local, q); });
+    var el = add('bot', '<p class="askme-thinking">...</p>');
+    function show(text) {
+      el.innerHTML = '<p>' + esc(text) + '</p>';
+      log.scrollTop = log.scrollHeight;
+      if (speakOn || lastVoiceQuestion) { speak(text); }
+    }
+    remoteAnswer(q, local).then(show).catch(function () { show(local.text); });
   }
-  form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); });
+  form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value, false); });
 
-  /* ---------- voice: Whisper in the browser (open source), browser speech API as the fallback ---------- */
-  var asr = null, asrLoading = null, rec = null, chunks = [], stream = null;
+  /* ---------- voice in: Whisper in the browser, browser recognizer as fallback; tap to start, tap to stop ---------- */
+  var asr = null, asrLoading = null, rec = null, chunks = [], autoStop = null;
   var MODEL = CFG.whisperModel || 'Xenova/whisper-tiny.en';
   function loadWhisper() {
     if (asr) { return Promise.resolve(asr); }
     if (asrLoading) { return asrLoading; }
-    status.textContent = 'Loading the speech model (one time, about 40 MB)...';
+    status.textContent = 'Getting my ears ready (first time only)...';
     asrLoading = import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js').then(function (T) {
       T.env.allowLocalModels = false;
       return T.pipeline('automatic-speech-recognition', MODEL, {
-        progress_callback: function (p) { if (p && p.status === 'progress' && p.file && /onnx/.test(p.file)) { status.textContent = 'Loading the speech model... ' + Math.round(p.progress || 0) + '%'; } }
+        progress_callback: function (p) { if (p && p.status === 'progress' && p.file && /onnx/.test(p.file)) { status.textContent = 'Getting my ears ready... ' + Math.round(p.progress || 0) + '%'; } }
       });
     }).then(function (p) { asr = p; status.textContent = ''; return p; })
-      .catch(function (err) { asrLoading = null; status.textContent = 'Could not load Whisper here; using the browser speech recognizer if it has one.'; throw err; });
+      .catch(function (err) { asrLoading = null; throw err; });
   }
   function toPCM16k(blob) {
     return blob.arrayBuffer().then(function (buf) {
       var AC = window.AudioContext || window.webkitAudioContext; var ac = new AC();
       return ac.decodeAudioData(buf).then(function (audio) {
-        var frames = Math.ceil(audio.duration * 16000);
-        var off = new OfflineAudioContext(1, frames, 16000);
+        var off = new OfflineAudioContext(1, Math.ceil(audio.duration * 16000), 16000);
         var src = off.createBufferSource(); src.buffer = audio; src.connect(off.destination); src.start();
         return off.startRendering();
-      }).then(function (rendered) { try { ac.close(); } catch (e) {} return rendered.getChannelData(0); });
+      }).then(function (r) { try { ac.close(); } catch (e) {} return r.getChannelData(0); });
     });
   }
   function browserSpeech() {
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { status.textContent = 'No speech recognition is available in this browser. Please type your question.'; return; }
+    if (!SR) { status.textContent = 'This browser has no speech input, so please type.'; return; }
     var r = new SR(); r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 1;
-    status.textContent = 'Listening (browser recognizer)...';
-    r.onresult = function (e) { var t = e.results[0][0].transcript; input.value = t; status.textContent = ''; ask(t); };
-    r.onerror = function () { status.textContent = 'Did not catch that. Try again or type.'; };
+    status.textContent = 'Listening...'; mic.setAttribute('aria-pressed', 'true');
+    r.onresult = function (e) { var t = e.results[0][0].transcript; status.textContent = ''; ask(t, true); };
+    r.onerror = function () { status.textContent = "I didn't catch that. Try again or type."; };
     r.onend = function () { mic.setAttribute('aria-pressed', 'false'); };
     r.start();
   }
   function startRec() {
-    if (rec) { return; }
+    stopSpeaking();
     if (!navigator.mediaDevices || !window.MediaRecorder) { browserSpeech(); return; }
     navigator.mediaDevices.getUserMedia({ audio: true }).then(function (s) {
-      stream = s; chunks = []; rec = new MediaRecorder(s);
+      chunks = []; rec = new MediaRecorder(s);
       rec.ondataavailable = function (e) { if (e.data && e.data.size) { chunks.push(e.data); } };
       rec.onstop = function () {
-        var blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' }); rec = null;
+        var blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' }); rec = null; clearTimeout(autoStop);
         s.getTracks().forEach(function (t) { t.stop(); });
-        if (blob.size < 2000) { status.textContent = 'Too short. Hold the mic while you speak.'; return; }
-        status.textContent = 'Transcribing...';
+        mic.setAttribute('aria-pressed', 'false');
+        if (blob.size < 2000) { status.textContent = 'Tap the mic, say your question, tap again.'; return; }
+        status.textContent = 'One second...';
         loadWhisper().then(function (p) { return toPCM16k(blob).then(function (pcm) { return p(pcm); }); })
-          .then(function (out) { var t = (out && out.text || '').trim(); status.textContent = ''; if (!t) { status.textContent = 'Did not catch that. Try again or type.'; return; } input.value = t; ask(t); })
-          .catch(function () { browserSpeech(); });
+          .then(function (out) { var t = (out && out.text || '').trim(); status.textContent = ''; if (!t || /^\[.*\]$/.test(t)) { status.textContent = "I didn't catch that. Try again or type."; return; } ask(t, true); })
+          .catch(function () { status.textContent = ''; browserSpeech(); });
       };
-      rec.start(); mic.setAttribute('aria-pressed', 'true'); status.textContent = 'Listening... release to send.';
+      rec.start(); mic.setAttribute('aria-pressed', 'true'); status.textContent = 'Listening... tap the mic again when you are done.';
+      autoStop = setTimeout(stopRec, 15000);
       loadWhisper().catch(function () {});
-    }).catch(function () { status.textContent = 'Microphone access was refused, so please type your question.'; });
+    }).catch(function () { status.textContent = 'Microphone access was refused, so please type.'; });
   }
-  function stopRec() { if (rec && rec.state === 'recording') { rec.stop(); } mic.setAttribute('aria-pressed', 'false'); }
-  mic.addEventListener('pointerdown', function (e) { e.preventDefault(); startRec(); });
-  mic.addEventListener('pointerup', stopRec);
-  mic.addEventListener('pointerleave', stopRec);
-  mic.addEventListener('keydown', function (e) { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); if (rec) { stopRec(); } else { startRec(); } } });
+  function stopRec() { if (rec && rec.state === 'recording') { rec.stop(); } }
+  mic.addEventListener('click', function () { if (rec) { stopRec(); } else { startRec(); } });
 })();

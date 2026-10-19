@@ -74,3 +74,9 @@ automated requests, which is its bot response, not a broken link); no `<img>` wi
 - Optional free upgrade in `chat-worker/`: a Cloudflare Worker with Workers AI (Llama 3.1 8B) phrases the
   answer from the same passages; the page falls back to the local answer on any error or after 12 seconds.
 - Tested in headless Chrome with a scripted set of questions (see DECISIONS.md 2026-10-19).
+- 2026-10-19 (later): the box became a plain chat. Header is just "Chat with Prashanth" with a read-aloud toggle; no
+  explanatory lines. Answers are composed as first-person sentences (sentence()/joinProse()/roleSentence()): the
+  company is named once, paraphrased duplicates between the resume and the story are dropped (Jaccard > 0.45), at most
+  two passages per reply, yes/no questions open with "Yes." or an honest "I know X but no project was built around it".
+  Voice in is tap-to-start / tap-to-stop (15 s auto-stop); voice out uses speechSynthesis, automatic after a spoken
+  question and switchable in the header.
