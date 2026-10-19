@@ -55,8 +55,8 @@ automated requests, which is its bot response, not a broken link); no `<img>` wi
 
 - Replace `https://your-domain.example/` after deploying (see `DEPLOY.md`).
 - Add a GitHub URL in `data.js` if he publishes code; the buttons appear automatically.
-- Optionally add a headshot: drop `photo.jpg` in the folder and add an `<img>` in the hero (not done,
-  since no photo was provided and nothing may be invented).
+- Headshot: `photo.jpg` (LinkedIn profile photo, cropped to drop a neighbour's shoulder, 574x640, 52 KB) sits above the
+  At a glance card as a circle (`.hero-photo`, object-position tuned to the face). Added 2026-10-19.
 
 ## Ask-me chat box (added 2026-10-19)
 
