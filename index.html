@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prashanth Kumar Sirusala | Data Engineer</title>
+  <meta name="description" content="Data Engineer in Miami, FL with 5+ years on AWS, Snowflake and Redshift. Made a 17B-row Snowflake workload 70-80% faster, cut an 18-hour refresh to 2 hours, and put Claude-based data-loss checks into CI.">
+  <meta name="author" content="Prashanth Kumar Sirusala">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <!-- Replace the canonical and og:url values with the final URL after deploying (see DEPLOY.md). -->
+  <link rel="canonical" href="https://prashanthk2209.github.io/">
+  <meta property="og:type" content="profile">
+  <meta property="og:title" content="Prashanth Kumar Sirusala | Data Engineer">
+  <meta property="og:description" content="AWS, Snowflake and Redshift data platforms with security built in and AI in the loop. 17B-row Snowflake workload 70-80% faster; 18-hour refresh cut to 2 hours.">
+  <meta property="og:url" content="https://prashanthk2209.github.io/">
+  <meta property="og:image" content="https://prashanthk2209.github.io/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Prashanth Kumar Sirusala, Data Engineer. AWS, Snowflake, security and AI.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Prashanth Kumar Sirusala | Data Engineer">
+  <meta name="twitter:description" content="AWS, Snowflake and Redshift data platforms with security built in and AI in the loop.">
+  <meta name="twitter:image" content="https://prashanthk2209.github.io/og.png">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f766e'/%3E%3Ctext x='32' y='41' font-family='Inter,Arial,sans-serif' font-size='28' font-weight='700' fill='white' text-anchor='middle'%3EPS%3C/text%3E%3C/svg%3E">
+
+  <!-- Theme before first paint: stored choice wins, else system preference. -->
+  <script>
+    (function () {
+      document.documentElement.classList.add('js');
+      var stored = null;
+      try { stored = localStorage.getItem('theme'); } catch (e) { stored = null; }
+      var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (dark) document.documentElement.classList.add('dark');
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
+          },
+          colors: {
+            brand: { 50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4', 300: '#5eead4', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 800: '#115e59', 900: '#134e4a' }
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="stylesheet" href="styles.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Prashanth Kumar Sirusala",
+    "jobTitle": "Data Engineer",
+    "email": "mailto:prashanthsirusala2209@gmail.com",
+    "telephone": "+1-786-561-6223",
+    "address": { "@type": "PostalAddress", "addressLocality": "Miami", "addressRegion": "FL", "addressCountry": "US" },
+    "alumniOf": [
+      { "@type": "CollegeOrUniversity", "name": "Florida International University" },
+      { "@type": "CollegeOrUniversity", "name": "Rajiv Gandhi University of Knowledge Technologies" }
+    ],
+    "hasCredential": [
+      { "@type": "EducationalOccupationalCredential", "name": "AWS Certified Solutions Architect - Associate" },
+      { "@type": "EducationalOccupationalCredential", "name": "CompTIA Security+" }
+    ],
+    "knowsAbout": ["Snowflake", "AWS", "Amazon Redshift", "Apache Iceberg", "PySpark", "dbt", "Airflow", "Terraform", "Claude API", "Data security"],
+    "sameAs": ["https://www.linkedin.com/in/psirusala"]
+  }
+  </script>
+</head>
+<body class="bg-white text-slate-800 dark:bg-slate-950 dark:text-slate-200 font-sans antialiased">
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur dark:border-slate-800 dark:bg-slate-950/85">
+    <nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6" aria-label="Primary">
+      <a href="#top" class="flex items-center gap-2 font-semibold tracking-tight text-slate-900 dark:text-white" id="brand-link">
+        <span class="grid h-8 w-8 place-items-center rounded-lg bg-brand-700 text-sm font-bold text-white" id="brand-initials" aria-hidden="true">PS</span>
+        <span id="brand-name">Prashanth Kumar Sirusala</span>
+      </a>
+      <ul id="nav-links" class="hidden items-center gap-1 text-sm font-medium md:flex">
+        <li><a class="nav-link" href="#about">About</a></li>
+        <li><a class="nav-link" href="#skills">Skills</a></li>
+        <li><a class="nav-link" href="#projects">Projects</a></li>
+        <li><a class="nav-link" href="#experience">Experience</a></li>
+        <li><a class="nav-link" href="#education">Education</a></li>
+        <li><a class="nav-link" href="#contact">Contact</a></li>
+        <li><a class="nav-link" href="#ask">Ask me</a></li>
+      </ul>
+      <div class="flex items-center gap-2">
+        <a id="nav-resume" href="Prashanth_kumar_sirusala.pdf" download class="btn btn-secondary hidden !py-1.5 !px-3 text-sm sm:inline-flex">
+          <i data-lucide="download" class="h-4 w-4" aria-hidden="true"></i><span>Resume</span>
+        </a>
+        <button id="theme-toggle" type="button" class="icon-btn" aria-label="Switch to dark mode" aria-pressed="false" title="Toggle color theme">
+          <i data-lucide="sun" class="h-5 w-5 hidden dark:block" aria-hidden="true"></i>
+          <i data-lucide="moon" class="h-5 w-5 dark:hidden" aria-hidden="true"></i>
+        </button>
+        <button id="menu-toggle" type="button" class="icon-btn md:hidden" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+          <i data-lucide="menu" class="h-5 w-5" aria-hidden="true"></i>
+        </button>
+      </div>
+    </nav>
+    <div id="mobile-menu" class="hidden border-t border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-950 md:hidden">
+      <ul class="flex flex-col gap-1 text-base font-medium">
+        <li><a class="nav-link block" href="#about">About</a></li>
+        <li><a class="nav-link block" href="#skills">Skills</a></li>
+        <li><a class="nav-link block" href="#projects">Projects</a></li>
+        <li><a class="nav-link block" href="#experience">Experience</a></li>
+        <li><a class="nav-link block" href="#education">Education</a></li>
+        <li><a class="nav-link block" href="#achievements">Achievements</a></li>
+        <li><a class="nav-link block" href="#contact">Contact</a></li>
+        <li><a class="nav-link block" href="Prashanth_kumar_sirusala.pdf" download>Download Resume (PDF)</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section id="top" class="hero relative overflow-hidden" aria-labelledby="hero-heading">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="mx-auto max-w-6xl px-4 pb-16 pt-14 sm:px-6 sm:pb-24 sm:pt-20">
+        <div class="grid items-start gap-10 lg:grid-cols-[1.4fr_1fr]">
+          <div class="reveal">
+            <p class="eyebrow" id="hero-eyebrow"></p>
+            <h1 id="hero-heading" class="mt-3 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl"></h1>
+            <p id="hero-headline" class="mt-4 max-w-2xl text-xl font-medium leading-snug text-slate-700 dark:text-slate-300 sm:text-2xl"></p>
+            <div id="hero-intro" class="mt-5 max-w-2xl space-y-2 text-base leading-relaxed text-slate-600 dark:text-slate-400 sm:text-lg"></div>
+            <ul id="hero-skills" class="mt-6 flex flex-wrap gap-2" aria-label="Top skills"></ul>
+            <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <a href="#projects" class="btn btn-primary justify-center"><i data-lucide="folder-kanban" class="h-4 w-4" aria-hidden="true"></i><span>View Projects</span></a>
+              <a id="hero-resume" href="Prashanth_kumar_sirusala.pdf" download class="btn btn-secondary justify-center"><i data-lucide="download" class="h-4 w-4" aria-hidden="true"></i><span>Download Resume</span></a>
+              <a href="#contact" class="btn btn-ghost justify-center"><i data-lucide="mail" class="h-4 w-4" aria-hidden="true"></i><span>Contact Me</span></a>
+            </div>
+            <div id="hero-links" class="mt-6 flex flex-wrap items-center gap-4 text-sm text-slate-600 dark:text-slate-400"></div>
+          </div>
+          <aside class="reveal reveal-delay-1 lg:pt-6" aria-label="At a glance">
+            <div class="card p-6">
+              <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">At a glance</h2>
+              <dl id="hero-facts" class="mt-4 space-y-4"></dl>
+              <p id="hero-open-to" class="mt-5 border-t border-slate-200 pt-4 text-sm leading-relaxed text-slate-600 dark:border-slate-800 dark:text-slate-400"></p>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section" aria-labelledby="about-heading">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="grid gap-10 lg:grid-cols-[1fr_1.6fr]">
+          <div class="reveal">
+            <h2 id="about-heading" class="section-title"></h2>
+            <p class="eyebrow mt-2">Who I am</p>
+          </div>
+          <div id="about-body" class="reveal reveal-delay-1 space-y-5 text-base leading-relaxed text-slate-700 dark:text-slate-300 sm:text-lg"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="section section-alt" aria-labelledby="skills-heading">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="reveal max-w-2xl">
+          <h2 id="skills-heading" class="section-title"></h2>
+          <p id="skills-intro" class="section-intro"></p>
+        </div>
+        <div id="skills-grid" class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+      </div>
+    </section>
+
+    <section id="projects" class="section" aria-labelledby="projects-heading">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="reveal max-w-2xl">
+          <h2 id="projects-heading" class="section-title"></h2>
+          <p id="projects-intro" class="section-intro"></p>
+        </div>
+        <div id="projects-grid" class="mt-10 grid gap-6 lg:grid-cols-2"></div>
+      </div>
+    </section>
+
+    <section id="experience" class="section section-alt" aria-labelledby="experience-heading">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="reveal max-w-2xl">
+          <h2 id="experience-heading" class="section-title"></h2>
+          <p id="experience-intro" class="section-intro"></p>
+        </div>
+        <ol id="experience-list" class="timeline mt-10"></ol>
+      </div>
+    </section>
+
+    <section id="education" class="section" aria-labelledby="education-heading">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="reveal max-w-2xl">
+          <h2 id="education-heading" class="section-title"></h2>
+        </div>
+        <div class="mt-10 grid gap-6 lg:grid-cols-2">
+          <div>
+            <h3 class="subheading"><i data-lucide="graduation-cap" class="h-5 w-5 text-brand-700 dark:text-brand-300" aria-hidden="true"></i>Education</h3>
+            <ul id="education-list" class="mt-4 space-y-4"></ul>
+          </div>
+          <div>
+            <h3 class="subheading"><i data-lucide="badge-check" class="h-5 w-5 text-brand-700 dark:text-brand-300" aria-hidden="true"></i>Certifications</h3>
+            <ul id="certification-list" class="mt-4 space-y-4"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="achievements" class="section section-alt" aria-labelledby="achievements-heading">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="reveal max-w-2xl">
+          <h2 id="achievements-heading" class="section-title"></h2>
+          <p id="achievements-intro" class="section-intro"></p>
+        </div>
+        <ul id="achievements-grid" class="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></ul>
+      </div>
+    </section>
+
+    <section id="resume" class="section" aria-labelledby="resume-heading">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="reveal card flex flex-col items-start gap-6 p-8 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 id="resume-heading" class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Resume</h2>
+            <p class="mt-2 max-w-xl text-slate-600 dark:text-slate-400">One page, PDF, the same file I send with applications. Skills, three roles, certifications and education.</p>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <a id="resume-download" href="Prashanth_kumar_sirusala.pdf" download class="btn btn-primary"><i data-lucide="download" class="h-4 w-4" aria-hidden="true"></i><span>Download Resume (PDF)</span></a>
+            <a id="resume-view" href="Prashanth_kumar_sirusala.pdf" target="_blank" rel="noopener" class="btn btn-secondary"><i data-lucide="external-link" class="h-4 w-4" aria-hidden="true"></i><span>View in browser</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section section-alt" aria-labelledby="contact-heading">
+      <div class="mx-auto max-w-6xl px-4 sm:px-6">
+        <div class="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
+          <div class="reveal">
+            <h2 id="contact-heading" class="section-title"></h2>
+            <p id="contact-intro" class="section-intro"></p>
+            <div id="contact-cta" class="mt-6 flex flex-wrap gap-3"></div>
+          </div>
+          <ul id="contact-list" class="reveal reveal-delay-1 grid gap-4 sm:grid-cols-2 lg:grid-cols-1"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-200 py-8 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+    <div class="mx-auto flex max-w-6xl flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <p id="footer-copy"></p>
+      <p id="footer-note"></p>
+    </div>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="kb.js"></script>
+  <!-- Optional: point the chat at the Cloudflare worker in chat-worker/ to have an open model phrase the answers.
+       <script>window.PORTFOLIO_CHAT = { endpoint: "https://portfolio-chat.YOUR-SUBDOMAIN.workers.dev" };</script> -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+  <script src="app.js" defer></script>
+  <script src="chat.js" defer></script>
+</body>
+</html>
