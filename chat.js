@@ -148,56 +148,80 @@
   /* ---------- intents ---------- */
   var YESNO = /^(are|do|did|have|has|can|could|would|is|were|was)\b/i;
   var INTENTS = [
-    { rx: /\b(who are you|about you|introduce|yourself|what do you do|tell me about you)\b/i, run: function () {
+    { rx: /\b(ai|llm|llms|genai|gen ai|language models?|machine learning|ml|claude|gpt|openai|agents?|chatbot|mcp)\b/i, topic: 'my AI work', run: function (q) {
+        var b = KB.filter(function (c) { return c.kind === 'bullet' && /Claude|MCP|AI-assisted/.test(c.text); }).slice(0, 2);
+        var p = byKind('project')[0];
+        var open = YESNO.test(q) ? 'Yes, hands-on, in production rather than as a demo. ' : '';
+        return open + joinProse(b, true) + ' Outside work I built JobHub, where parallel Claude browser agents fill application forms and a hiring-manager agent reviews each tailored resume. I also use Snowflake Cortex and the Claude and GPT APIs for data-quality and documentation work.' + (p ? '' : '');
+      } },
+    { rx: /\b(who are you|about you|introduce|yourself|what do you do|tell me about you)\b/i, topic: 'my background', run: function () {
         var y = byKind('years')[0], hero = KB.filter(function (c) { return c.kind === 'bullet' && /17B|18 hours/.test(c.text); }).slice(0, 2);
         return "I'm Prashanth, a data engineer in Miami. " + (y ? y.text : '') + ' Most recently, ' + lowerFirst(joinProse(hero, false));
       } },
     { rx: /\b(how (many|much) years|years of experience|how long|experience do you have|how experienced)\b/i, run: function () { return byKind('years')[0].text; } },
     { rx: /\b(email|phone|contact|reach you|linkedin|get in touch|hire you how|talk to you)\b/i, run: function () { return byKind('contact')[0].text; } },
     { rx: /\b(available|availability|notice|when can you (start|join)|start date)\b/i, run: function () { return byKind('availability')[0].text; } },
-    { rx: /\b(remote|hybrid|onsite|on-site|relocat\w*|where (are you|do you live)|based)\b/i, run: function () { return byKind('availability')[0].text; } },
+    { rx: /\b(where (are you )?(located|based|living)|where do you live|current(ly)? (locat|based|liv)|which city|what city|where in the (us|states|country))/i, run: function () { return "I'm based in Miami, Florida. I work remote or hybrid and I'm open to relocation for the right role."; } },
+    { rx: /\b(remote|hybrid|onsite|on-site|relocat\w*|work from home)\b/i, run: function () { return byKind('availability')[0].text; } },
     { rx: /\b(looking for|open to|what roles|kind of role|next role|ideal role|what are you after)\b/i, run: function () { return byKind('goals')[0].text; } },
-    { rx: /certif|security\+|solutions architect/i, run: function () { return 'Two: ' + byKind('certs')[0].text.replace(/^Certifications: /, '').replace(/\.$/, '') + '. The security one is not decoration; it is how I approach pipeline design.'; } },
-    { rx: /\b(education|degree|university|college|school|master|bachelor|study|studied)\b/i, run: function () {
+    { rx: /certif|security\+|solutions architect/i, topic: 'my certifications', run: function () { return 'Two: ' + byKind('certs')[0].text.replace(/^Certifications: /, '').replace(/\.$/, '') + '. The security one is not decoration; it is how I approach pipeline design.'; } },
+    { rx: /\b(education|degree|university|college|school|master|bachelor|study|studied)\b/i, topic: 'my education', run: function () {
         var e = byKind('education'); return 'I have ' + e.map(function (c) { return c.text.replace(/\.$/, ''); }).join(', and before that ') + '. The master\'s is why security shows up in how I design pipelines.';
       } },
-    { rx: /\b(current (role|job|company|position)|where do you work|work now|present role|right now)\b/i, run: function () {
+    { rx: /\b(current (role|job|company|position)|where do you work|work now|present role|right now)\b/i, topic: 'my current role at Tech Detectives', run: function () {
         var r = byKind('role')[0], b = KB.filter(function (c) { return c.kind === 'bullet' && c.role === r.role; }).slice(0, 2);
         return roleSentence(r, "I'm") + ' ' + joinProse(b, false);
       } },
-    { rx: /\b(jobhub|side project|projects?|built for yourself)\b/i, run: function () { return byKind('project')[0].text; } },
+    { rx: /\b(jobhub|side project|projects?|built for yourself)\b/i, topic: 'JobHub', run: function () { return byKind('project')[0].text; } },
     { rx: /\b(why (should we|hire)|strengths?|pitch|sell yourself|what makes you|stand out|best at|good at)\b/i, run: function () {
         var hero = KB.filter(function (c) { return c.kind === 'bullet' && /17B|18 hours/.test(c.text); }).slice(0, 2);
         return 'Three things. I ship measurable results: ' + lowerFirst(joinProse(hero, false)) + ' I bring security with me, with an M.S. in Cybersecurity, Security+ and the AWS Solutions Architect certification. And I use AI where it earns its place, from Claude-based checks in CI to the agents that run JobHub.';
-      } },
-    { rx: /\b(ai|llm|llms|genai|gen ai|language models?|machine learning|ml|claude|gpt|openai|agents?|chatbot|mcp)\b/i, run: function (q) {
-        var b = KB.filter(function (c) { return c.kind === 'bullet' && /Claude|MCP|AI-assisted/.test(c.text); }).slice(0, 2);
-        var p = byKind('project')[0];
-        var open = YESNO.test(q) ? 'Yes, hands-on, in production rather than as a demo. ' : '';
-        return open + joinProse(b, true) + ' Outside work I built JobHub, where parallel Claude browser agents fill application forms and a hiring-manager agent reviews each tailored resume. I also use Snowflake Cortex and the Claude and GPT APIs for data-quality and documentation work.' + (p ? '' : '');
       } },
     { rx: /\b(tech detectives|triangulum|mindtree)\b/i, run: function (q) {
         var name = /tech detectives/i.test(q) ? 'Tech Detectives' : /triangulum/i.test(q) ? 'Triangulum' : 'Mindtree';
         var role = KB.filter(function (c) { return c.kind === 'role' && c.role.indexOf(name) === 0; })[0];
         var bullets = KB.filter(function (c) { return c.kind === 'bullet' && c.role.indexOf(name) === 0; });
         bullets.sort(function (a, b) { return (OUTCOME.test(b.text) ? 1 : 0) - (OUTCOME.test(a.text) ? 1 : 0); });
-        return (role ? roleSentence(role, name === 'Tech Detectives' ? "I'm" : 'I was') + ' ' : '') + joinProse(bullets.slice(0, 3), false);
+        memory.entity = name; return (role ? roleSentence(role, name === 'Tech Detectives' ? "I'm" : 'I was') + ' ' : '') + joinProse(bullets.slice(0, 3), false);
       } }
   ];
   var OFF_LIMITS = /\b(visa|sponsor|sponsorship|h-?1b|salary|compensation|pay|rate|how much do you (make|earn)|date of birth|birthday|age|home address|ssn|social security)\b/i;
   function contactEmail() { var m = /([\w.+-]+@[\w-]+\.[\w.]+)/.exec((byKind('contact')[0] || {}).text || ''); return m ? m[1] : 'prashanthsirusala2209@gmail.com'; }
 
-  function answer(q) {
+  var memory = { topic: '', entity: '' };
+  var ENTITY_RX = /\b(jobhub|snowflake|redshift|aws|kafka|kinesis|dbt|airflow|terraform|glue|athena|iceberg|ssis|sql server|tableau|mindtree|triangulum|tech detectives|fiu|cybersecurity|claude|mcp|chatbot|hipaa|healthcare)\b/i;
+  function remember(q, text, topic) {
+    var m = ENTITY_RX.exec(q);
+    memory.entity = topic || (m ? m[0] : (ENTITY_RX.exec(text) || [memory.entity])[0]) || '';
+    memory.topic = q;
+  }
+  function resolve(q) {
+    // "what is it?" / "tell me more" / "and that?" -> attach the last entity so the question stands on its own
+    var content = tokens(q).filter(function (w) { return !/^(it|that|this|those|these|there|more|one|thing|mean|again|explain|elaborate|detail|details)$/.test(w); });
+    if (content.length === 0 && memory.entity) { return q + ' ' + memory.entity; }
+    if (/\b(it|that|this)\b/i.test(q) && content.length <= 2 && memory.entity && !ENTITY_RX.test(q)) { return q + ' ' + memory.entity; }
+    return q;
+  }
+  function answer(q0) {
+    var q = resolve(q0);
+    var a = answerCore(q);
+    if (!a.miss) { remember(q, a.text, a.topic); }
+    return a;
+  }
+  function answerCore(q) {
     if (OFF_LIMITS.test(q)) {
       return { text: "Those are things I'd rather cover directly than on a web page. Email me at " + contactEmail() + ' and I will answer the same day.', refs: [] };
     }
     for (var i = 0; i < INTENTS.length; i++) {
       if (INTENTS[i].rx.test(q)) {
         var t = INTENTS[i].run(q);
-        if (t) { return { text: t, refs: [] }; }
+        if (t) { return { text: t, refs: [], topic: INTENTS[i].topic || '' }; }
       }
     }
     var miss = { text: "Honestly, that is not something in my work history, and I would rather say so than guess. Ask me about the Snowflake and AWS work, the pipelines I run, JobHub, my background, or how to reach me.", refs: [], miss: true };
+    var unclear = { text: "I'm not sure I followed that" + (memory.entity ? '. Do you mean something about ' + memory.entity + ', or ' : '. ') + "could you put it another way?", refs: [], miss: true };
+    var content = tokens(q).filter(function (w) { return !/^(it|that|this|those|these|there|more|one|thing|mean|again|look|going)$/.test(w); });
+    if (content.length === 0) { return unclear; }
     var toolTerms = tokens(q).filter(function (w) { return TOOLS[w]; });
     if (toolTerms.length) {
       var holders = DOCS.filter(function (d) { return toolTerms.some(function (w) { return d.tf[w]; }); });
@@ -213,15 +237,15 @@
       var open = YESNO.test(q) ? 'Yes. ' : '';
       var companies = pick.map(companyOf).filter(function (v, i, a) { return v && a.indexOf(v) === i; });
       var intro = open + (companies.length > 1 ? 'I have used ' + names + ' at ' + companies.join(' and ') + '. ' : '');
-      return { text: intro + joinProse(pick, companies.length <= 1), refs: [] };
+      return { text: intro + joinProse(pick, companies.length <= 1), refs: [], topic: names };
     }
     var hits = search(q, 6);
-    if (!hits.length || hits[0].s < 1.2) { return miss; }
+    if (!hits.length || hits[0].s < 1.2) { return (toolTerms.length || /\b(know|use|used|experience|familiar|worked)\b/i.test(q)) ? miss : unclear; }
     rerank(hits);
     var top = dedupe(hits.filter(function (h) { return h.s >= hits[0].s * 0.45; }).map(function (h) { return h.c; })).slice(0, 3);
     return { text: (YESNO.test(q) ? 'Yes. ' : '') + joinProse(top, true), refs: [] };
   }
-  window.PORTFOLIO_CHAT_DEBUG = { tokens: tokens, DF: DF, search: search, answer: answer };
+  window.PORTFOLIO_CHAT_DEBUG = { tokens: tokens, DF: DF, search: search, answer: answer, memory: memory };
 
   /* ---------- optional worker ---------- */
   function remoteAnswer(q, local) {
