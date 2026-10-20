@@ -148,6 +148,11 @@
   /* ---------- intents ---------- */
   var YESNO = /^(are|do|did|have|has|can|could|would|is|were|was)\b/i;
   var SMALLTALK = [
+    // acknowledgements ("okay", "cool", "got it"): answer warmly and offer a next topic, rotating so it never repeats twice in a row
+    { rx: /^(ok(ay)?|k+|kk|okie|alright|all right|cool|nice|great|awesome|wow|interesting|impressive|got it|i see|sure|fine|hmm+|mm+|uh huh|right|perfect|sounds good|makes sense|good|neat|lol|haha+)[!.?\s]*$/i, texts: [
+      "Glad that helps. Want to hear how I made the Snowflake workload faster, or about JobHub, the job-search system I built?",
+      "Happy to go deeper anywhere. I can talk about the AWS pipelines, how I use AI in my work, or my background in cybersecurity.",
+      "Sure. If you're hiring, ask me why I'd fit your team, or tap Voice chat and we can just talk." ] },
     { rx: /^(hello|hi|hey|hallo|good (morning|afternoon|evening)|yo|hiya)(\s+(there|prashanth|prashant))?[!.,?\s]*$/i, text: "Hi, I'm Prashanth. Ask me anything about my work, the Snowflake and AWS platforms, JobHub, or how to reach me." },
     { rx: /\b(how are you|how('s| is) it going|how are things|how do you do|what's up|whats up|how have you been)\b/i, text: "Doing well, thanks for asking. I'm a data engineer in Miami, and I'm happy to talk through anything on my resume. What would you like to know?" },
     { rx: /\b(are you there|can you hear me|you there|hear me|is this working|testing|test test|hello\?)\b/i, text: "I'm here and I can hear you. Go ahead and ask." },
@@ -157,6 +162,7 @@
     { rx: /\b(bye|goodbye|see you|talk later|that's all|thats all|i'm done|im done|stop)\b/i, text: "Thanks for stopping by. My email and LinkedIn are at the bottom of the page whenever you're ready." },
     { rx: /\b(nice to meet you|pleasure|good to meet)\b/i, text: "Likewise. What would you like to know about my work?" }
   ];
+  var ackTurn = 0;
   var INTENTS = [
     { rx: /\b(ai|llm|llms|genai|gen ai|language models?|machine learning|ml|claude|gpt|openai|agents?|chatbot|mcp)\b/i, topic: 'my AI work', run: function (q) {
         var b = KB.filter(function (c) { return c.kind === 'bullet' && /Claude|MCP|AI-assisted/.test(c.text); }).slice(0, 2);
@@ -219,6 +225,8 @@
     return q;
   }
   function answer(q0) {
+    var st = SMALLTALK.filter(function (x) { return x.texts && x.rx.test(String(q0).trim()); })[0];   // "got it": before "it" is resolved to a topic
+    if (st) { return { text: st.texts[(ackTurn++) % st.texts.length], refs: [], topic: memory.entity }; }
     var q = resolve(q0);
     var a = answerCore(q);
     if (!a.miss) { remember(q, a.text, a.topic); }
@@ -226,7 +234,7 @@
   }
   function answerCore(q) {
     var hasTool = tokens(q).some(function (w) { return TOOLS[w]; });
-    if (!hasTool && tokens(q).length <= 6) { for (var s = 0; s < SMALLTALK.length; s++) { if (SMALLTALK[s].rx.test(q.trim())) { return { text: SMALLTALK[s].text, refs: [], topic: memory.entity }; } } }
+    if (!hasTool && tokens(q).length <= 6) { for (var s = 0; s < SMALLTALK.length; s++) { if (SMALLTALK[s].rx.test(q.trim())) { return { text: SMALLTALK[s].text || SMALLTALK[s].texts[(ackTurn++) % SMALLTALK[s].texts.length], refs: [], topic: memory.entity }; } } }
     if (OFF_LIMITS.test(q)) {
       return { text: "Those are things I'd rather cover directly than on a web page. Email me at " + contactEmail() + ' and I will answer the same day.', refs: [] };
     }
