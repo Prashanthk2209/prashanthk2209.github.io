@@ -10,6 +10,33 @@
   var CFG = window.PORTFOLIO_CHAT || {};
   if (!KB.length || !document.body) { return; }
 
+  /* ---------- visit log: counts and typed questions go to a Google Sheet in Prashanth's Drive, through his relay ---------- */
+  // No cookies, no names, no IP addresses, no voice recordings. Only on the live site; open it once with ?notrack to
+  // exclude this browser (for Prashanth's own visits).
+  var TRACK = !!CFG.endpoint && /\.github\.io$/.test(location.hostname), VID = '', SID = '';
+  function rid() { return Math.random().toString(36).slice(2, 10); }
+  try {
+    if (/[?&]notrack\b/.test(location.search)) { localStorage.setItem('notrack', '1'); }
+    if (localStorage.getItem('notrack')) { TRACK = false; }
+    VID = localStorage.getItem('vid') || rid(); localStorage.setItem('vid', VID);
+    SID = sessionStorage.getItem('sid') || rid(); sessionStorage.setItem('sid', SID);
+  } catch (e) { VID = VID || rid(); SID = SID || rid(); }
+  var REF = (function () { try { return document.referrer ? new URL(document.referrer).hostname : 'direct'; } catch (e) { return 'unknown'; } })();
+  var DEV = window.matchMedia && window.matchMedia('(pointer: coarse)').matches ? 'mobile' : 'desktop';
+  function track(ev, detail) {
+    if (!TRACK) { return; }
+    var q = '?ev=' + ev + '&vid=' + VID + '&sid=' + SID + '&ref=' + encodeURIComponent(REF) + '&dev=' + DEV +
+      (detail ? '&d=' + encodeURIComponent(String(detail).slice(0, 240)) : '');
+    try { fetch(CFG.endpoint + q, { mode: 'no-cors', keepalive: true }).catch(function () {}); } catch (e) {}
+  }
+  track('view');
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a'); if (!a) { return; }
+    var h = a.getAttribute('href') || '';
+    if (/\.pdf/i.test(h)) { track('resume', a.id || 'link'); }
+    else if (/^mailto:|linkedin\.com|^tel:/i.test(h)) { track('contact', /^mailto:/i.test(h) ? 'email' : /^tel:/i.test(h) ? 'phone' : 'linkedin'); }
+  }, true);
+
   /* ---------- text tools ---------- */
   var STOP = {};
   'a an the and or of to in on at for with by from as is are was were be been i my me you your he she it we they this that these those do does did have has had what which who whom whose how when where why can could would should will shall about tell say give show list some any much many more most very really please thanks thank familiar know ever'
@@ -325,6 +352,7 @@
         '<button type="submit" class="btn btn-primary !py-2 !px-3">Send</button>' +
       '</form>' +
       '<p id="askme-status" class="askme-status" aria-live="polite"></p>' +
+      '<p class="askme-note">Typed questions are logged anonymously to improve this page. Voice chat runs on Google Gemini.</p>' +
     '</section>';
   document.body.appendChild(root);
   var openBtn = document.getElementById('askme-open'), panel = document.getElementById('askme-panel'), closeBtn = document.getElementById('askme-close');
@@ -341,6 +369,7 @@
     suggest.innerHTML = SUGGEST.map(function (s) { return '<button type="button" class="chip">' + esc(s) + '</button>'; }).join('');
   }
   function open(auto) {
+    if (panel.hidden) { track('open', auto ? 'auto' : 'click'); }
     warmRelay(); panel.hidden = false; openBtn.setAttribute('aria-expanded', 'true'); greet();
     if (!auto) { setTimeout(function () { input.focus(); }, 50); }        // opened by itself: do not pop up a phone keyboard
   }
@@ -373,6 +402,7 @@
     add('user', '<p>' + esc(q) + '</p>');
     input.value = '';
     var local = answer(q), way = route(q);
+    track('question', (way === 'reject' ? 'declined: ' : '') + q);
     var el = add('bot', '<p class="askme-thinking">...</p>');
     function show(text) {
       turns.push({ role: 'user', text: q }, { role: 'bot', text: text });
@@ -387,7 +417,7 @@
   form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value, false); });
 
   /* ---------- voice chat: a live conversation with Gemini (live.js), transcribed into the log ---------- */
-  var liveState = 'off', userEl = null, botEl = null;
+  var liveState = 'off', userEl = null, botEl = null, voiceTurns = 0;
   function liveUI() {
     mic.setAttribute('aria-pressed', String(liveState !== 'off'));
     mic.querySelector('span').textContent = liveState === 'off' ? 'Voice chat' : liveState === 'connecting' ? 'Connecting...' : 'End voice chat';
@@ -408,17 +438,18 @@
       return L.start({ on: {
         user: function (t) { if (botEl) { userEl = null; botEl = null; } userEl = bubble('user', userEl, t); status.textContent = 'Listening...'; },
         bot: function (t) { botEl = bubble('bot', botEl, t); },
-        turn: function (x) { if (x.user) { turns.push({ role: 'user', text: x.user }); } if (x.bot) { turns.push({ role: 'bot', text: x.bot }); } userEl = null; botEl = null; },
+        turn: function (x) { voiceTurns++; if (x.user) { turns.push({ role: 'user', text: x.user }); } if (x.bot) { turns.push({ role: 'bot', text: x.bot }); } userEl = null; botEl = null; },
         speaking: function (on) { status.textContent = on ? 'Speaking... talk any time to interrupt.' : 'Listening... just talk.'; },
         end: function (why) {
+          track('voice_end', (why || '') + ', ' + voiceTurns + ' answers'); voiceTurns = 0;
           liveState = 'off'; userEl = null; botEl = null; liveUI();
           status.textContent = why === 'idle' ? 'Voice chat ended after a quiet moment. Tap Voice chat to talk again.' :
             why === 'limit' ? 'That voice chat reached its time limit. Tap Voice chat to start another.' : '';
         } } });
     }).then(function () {
-      liveState = 'on'; liveUI(); status.textContent = "Listening... just talk. Say hi, or ask about my work.";
+      liveState = 'on'; liveUI(); track('voice_start'); status.textContent = "Listening... just talk. Say hi, or ask about my work.";
     }).catch(function () {
-      liveState = 'off'; liveUI();
+      track('voice_busy'); liveState = 'off'; liveUI();
       status.textContent = 'Voice chat is busy right now, so please type. You will still get answers.';
     });
   }

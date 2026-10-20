@@ -187,3 +187,5 @@ html.dark .askme-voicebtn { border-color: #5eead4; color: #5eead4; background: #
 .askme-voicebtn.askme-voice-on { animation: askme-pulse 1.2s ease-in-out infinite; }
 html.dark .askme-voicebtn[aria-pressed="true"] { background: #450a0a; border-color: #f87171; color: #fecaca; }
 @media (max-width: 420px) { .askme-voicebtn span { display: none; } .askme-voicebtn { padding: 0 .6rem; } }
+.askme-note { padding: 0 1rem .7rem; font-size: .7rem; line-height: 1.35; color: #94a3b8; }
+html.dark .askme-note { color: #64748b; }

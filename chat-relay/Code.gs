@@ -9,6 +9,9 @@
    GET  ?live=1&session=ID  -> {token, model}: a one-use pass for Gemini Live (voice in, voice out, ~0.7 s to first
                                sound). The pass is LOCKED to the model, voice and instructions below: a copied pass can
                                only ever talk as Prashanth about his work, once, within 30 minutes.
+   GET  ?ev=NAME&vid=..&sid=..&ref=..&dev=..&d=..  -> visit log: one row in the "Portfolio visits" Google Sheet in
+                               Prashanth's Drive (created on first use). Counts and typed questions only: no names,
+                               no IP addresses, no voice recordings.
    POST {question, history, session} (text/plain) -> {answer}: typed chat via Gemini Flash-Lite.
    Deciding what to answer happens here: an off-topic filter runs before any Gemini call, and the instructions tell
    Gemini to decline anything personal or unrelated. Anything that fails -> the page uses its built-in answers. */
@@ -20,6 +23,8 @@ var VOICE = 'Charon';
 var DAILY_TEXT_CAP = 450;       // under the ~500/day free Flash-Lite quota
 var DAILY_LIVE_CAP = 200;       // voice conversations per day
 var SESSION_CAP_PER_HOUR = 40;  // per browser session id
+var DAILY_LOG_CAP = 3000;       // visit-log rows per day (stops a flood of fake events)
+var EVENTS = { view: 1, open: 1, question: 1, voice_start: 1, voice_end: 1, voice_busy: 1, resume: 1, contact: 1 };
 
 var NOT_ENGLISH = "Sorry, I don't understand. Could you please speak in English?";
 var RULES = [
@@ -55,6 +60,7 @@ function instructions() { return RULES + '\n\nYOUR STORY:\n' + story(); }
 
 function doGet(e) {
   var p = (e && e.parameter) || {};
+  if (p.ev) { return json(logEvent(p)); }
   if (!p.live) { return json({ ok: true }); }   // health check / warm-up
   try {
     if (!underCaps('live', DAILY_LIVE_CAP, String(p.session || '').slice(0, 64))) { return json({ error: 'cap' }); }
@@ -127,6 +133,48 @@ function underCaps(kind, cap, session) {
     props.setProperties(upd);
     return true;
   } finally { lock.releaseLock(); }
+}
+
+/* ---------- visit log: a Google Sheet in Prashanth's own Drive ---------- */
+function logEvent(p) {
+  var ev = String(p.ev || '');
+  if (!EVENTS[ev]) { return { ok: false }; }
+  var cache = CacheService.getScriptCache(), day = Utilities.formatDate(new Date(), 'America/New_York', 'yyyy-MM-dd');
+  var n = Number(cache.get('log:' + day) || 0);
+  if (n >= DAILY_LOG_CAP) { return { ok: false, error: 'cap' }; }
+  cache.put('log:' + day, String(n + 1), 21600);
+  function cell(v, max) {   // plain text only: a leading = + - @ would make Sheets run it as a formula
+    v = String(v || '').slice(0, max || 80).replace(/[\r\n\t]+/g, ' ');
+    return /^[=+\-@]/.test(v) ? "'" + v : v;
+  }
+  sheet().appendRow([new Date(), ev, cell(p.vid, 16), cell(p.sid, 16), cell(p.ref, 60), cell(p.dev, 10), cell(p.d, 240)]);
+  return { ok: true };
+}
+function sheet() {
+  var props = PropertiesService.getScriptProperties(), id = props.getProperty('SHEET_ID'), ss = null;
+  if (id) { try { ss = SpreadsheetApp.openById(id); } catch (e) { ss = null; } }
+  if (!ss) {
+    var lock = LockService.getScriptLock(); lock.waitLock(10000);
+    try {
+      id = props.getProperty('SHEET_ID');
+      if (id) { ss = SpreadsheetApp.openById(id); }
+      else {
+        ss = SpreadsheetApp.create('Portfolio visits'); ss.setSpreadsheetTimeZone('America/New_York');
+        var ev = ss.getSheets()[0]; ev.setName('events');
+        ev.appendRow(['time (Eastern)', 'event', 'visitor', 'visit', 'came from', 'device', 'detail']);
+        ev.setFrozenRows(1); ev.getRange('A:A').setNumberFormat('yyyy-mm-dd hh:mm');
+        var sum = ss.insertSheet('summary');
+        sum.getRange('A1').setValue('Events per day (newest first)');
+        sum.getRange('A2').setFormula('=QUERY(events!A2:B, "select toDate(A), count(A) where A is not null group by toDate(A) pivot B order by toDate(A) desc label toDate(A) \'day\'", 0)');
+        sum.getRange('J1').setValue('Unique visitors per day');
+        sum.getRange('J2').setFormula('=QUERY(UNIQUE(FILTER({INT(events!A2:A), events!C2:C}, events!A2:A<>"")), "select Col1, count(Col2) group by Col1 order by Col1 desc label Col1 \'day\', count(Col2) \'visitors\'", 0)');
+        sum.getRange('J:J').setNumberFormat('yyyy-mm-dd');
+        sum.getRange('A1').setFontWeight('bold'); sum.getRange('J1').setFontWeight('bold');
+        props.setProperty('SHEET_ID', ss.getId());
+      }
+    } finally { lock.releaseLock(); }
+  }
+  return ss.getSheetByName('events');
 }
 
 function json(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
