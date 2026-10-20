@@ -31,7 +31,7 @@ window.PORTFOLIO = {
     phoneHref: "tel:+17865616223",
     linkedin: "https://www.linkedin.com/in/psirusala",
     github: "",
-    resumeFile: "Prashanth_kumar_sirusala.pdf",
+    resumeFile: "Prashanth_kumar_sirusala.pdf?v=202610200334",
     resumeLabel: "Download Resume (PDF)"
   },
 
