@@ -1,9 +1,10 @@
-/* chat.js - conversational "Ask me" box for the portfolio.
+/* chat.js - the "Talk to me" panel for the portfolio. It opens by itself the first time a visitor scrolls.
+   Typing: static answers composed in the browser from kb.js (no server, no quota). Voice chat button: a live voice
+   conversation with Gemini (live.js), transcribed into the same log.
    Knowledge: window.PORTFOLIO_KB (kb.js, generated from the master resume and story). Nothing else.
    Answers are composed in the browser as first-person sentences from the matching passages (no server, no keys).
-   Voice in: Whisper (open source) in the browser via transformers.js, browser recognizer as fallback.
-   Voice out: the browser's speech synthesis, on by default after a spoken question, toggle in the header.
-   Optional: window.PORTFOLIO_CHAT.endpoint (chat-worker/) lets an open model phrase the reply from the same passages. */
+   Read aloud (speaker toggle): Kokoro in the browser (tts.js), the browser's own voice while it downloads.
+   window.PORTFOLIO_CHAT.endpoint is the Apps Script relay (chat-relay/) that hands out the Gemini Live passes. */
 (function () {
   'use strict';
   var KB = window.PORTFOLIO_KB || [];
@@ -266,14 +267,34 @@
   window.PORTFOLIO_CHAT_DEBUG = { tokens: tokens, DF: DF, search: search, answer: answer, memory: memory, spoken: function (t) { return spoken(t); } };
 
   /* ---------- optional worker ---------- */
-  function remoteAnswer(q, local) {
-    if (!CFG.endpoint) { return Promise.reject(new Error('no endpoint')); }
-    var passages = [local.text].concat(search(q, 6).map(function (h) { return h.c.text; })).filter(function (t, i, a) { return a.indexOf(t) === i; }).slice(0, 8);
-    var ctrl = new AbortController(); setTimeout(function () { ctrl.abort(); }, 12000);
-    return fetch(CFG.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: q, passages: passages }), signal: ctrl.signal })
-      .then(function (r) { if (!r.ok) { throw new Error('worker ' + r.status); } return r.json(); })
-      .then(function (d) { if (!d || !d.answer) { throw new Error('empty'); } return String(d.answer).slice(0, 1200); });
+  var turns = [];
+  /* ---------- gate: decide in the browser what may use the free Gemini quota ---------- */
+  // Personal and off-topic questions are refused here, before any request is made. Exact facts (contact, availability,
+  // location, years, certifications, education) come from the built-in answers: exact, instant and free.
+  // Only real career and interview questions go to the relay.
+  var OFF_TOPIC = /\b(wife|girlfriend|boyfriend|married|marriage|dating|single|kids?|children|family|parents?|mom|dad|siblings?|religion|religious|god|caste|politic\w*|vote|election|weather|movies?|films?|songs?|music|cricket|football|soccer|nba|recipes?|cook\w*|jokes?|poems?|horoscope|zodiac|health|sick|illness|medical|weight|height|sex\w*|drugs?|alcohol|drink|bitcoin|crypto|stocks?|homework|capital of|translate|ignore (all|the|your|previous|prior)\b|system prompt|jailbreak|pretend|role ?play|hobb(y|ies)|girlfriends?|address|ssn|religion)\b|\bwrite\b.{0,40}\b(code|program|script|essay|function|story|email|letter|poem|sql query)\b|\b(leetcode|fizzbuzz|reverse a string)\b/i;
+  var LOCAL_FACT = /\b(how (many|much) years|years of experience|email|phone|contact|reach you|get in touch|available|availability|notice period|start date|when can you (start|join)|located|based|where do you live|relocat\w*|remote|hybrid|onsite|on-site|certif\w*|degree|education|university|college|master'?s|bachelor'?s|who are you|about you|yourself|introduce|what do you do|why (should we|hire)|sell yourself|pitch)\b/i;   // incl. the reviewed pitch answers
+  var CAREER = {};
+  ('work worked working job jobs role roles career experience experienced project projects skill skills strength strengths weakness weaknesses team ' +
+   'teams manager managers lead led leadership hire hiring interview challenge challenges challenging conflict failure failed fail mistake mistakes achievement ' +
+   'achievements proud goal goals learn learned learning tool tools stack pipeline pipelines data engineer engineering cloud company companies client clients ' +
+   'resume background deadline deadlines pressure feedback motivate motivation fit culture design architecture debug debugging problem problems decision ' +
+   'impact result results built build building scale performance security ai llm model models agent agents automation stakeholder stakeholders').split(' ')
+    .forEach(function (w) { CAREER[w] = 1; });
+  var REJECT = "I'd rather keep this to my work. Ask me about my projects, the tools I use, or how I'd fit your team.";
+  function route(q) {
+    var t = q.trim();
+    if (OFF_LIMITS.test(t)) { return 'local'; }                       // visa, salary, age...: the built-in redirect to email
+    if (OFF_TOPIC.test(t)) { return 'reject'; }
+    var words = tokens(t);
+    if (words.length <= 6 && SMALLTALK.some(function (s) { return s.rx.test(t); })) { return 'local'; }
+    if (LOCAL_FACT.test(t)) { return 'local'; }
+    var r = tokens(resolve(t));                                       // "how did you do that?" picks up the last topic
+    if (r.some(function (w) { return CAREER[w] || TOOLS[w] || (DF[w] && DF[w] <= DOCS.length * 0.3); })) { return 'remote'; }
+    if (turns.length && words.length <= 4) { return 'remote'; }      // a short follow-up inside a conversation
+    return 'reject';
   }
+  function warmRelay() { if (CFG.endpoint) { fetch(CFG.endpoint).catch(function () {}); } }   // Apps Script cold starts take seconds
 
   /* ---------- UI ---------- */
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -285,16 +306,16 @@
   root.innerHTML =
     '<button id="askme-open" type="button" class="askme-fab" aria-haspopup="dialog" aria-expanded="false" aria-controls="askme-panel">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
-      '<span>Ask me</span></button>' +
+      '<span>Talk to me</span></button>' +
     '<section id="askme-panel" class="askme-panel card" role="dialog" aria-modal="false" aria-labelledby="askme-title" hidden>' +
-      '<header class="askme-head"><h2 id="askme-title">Chat with Prashanth</h2><div class="askme-tools">' +
+      '<header class="askme-head"><h2 id="askme-title">Talk to Prashanth</h2><div class="askme-tools">' +
         '<label class="sr-only" for="askme-voice">Voice</label><select id="askme-voice" class="askme-voice" title="Voice" hidden></select>' +
         '<button id="askme-speak" type="button" class="icon-btn" aria-label="Read answers aloud" aria-pressed="false" title="Read answers aloud">' + SPK_SVG + '</button>' +
         '<button id="askme-close" type="button" class="icon-btn" aria-label="Close">&#x2715;</button></div></header>' +
       '<div id="askme-log" class="askme-log" aria-live="polite" aria-relevant="additions"></div>' +
       '<div id="askme-suggest" class="askme-suggest" aria-label="Example questions"></div>' +
       '<form id="askme-form" class="askme-form" autocomplete="off">' +
-        '<button id="askme-mic" type="button" class="icon-btn askme-mic" aria-label="Talk" aria-pressed="false" title="Tap to talk">' + MIC_SVG + '</button>' +
+        '<button id="askme-mic" type="button" class="askme-voicebtn" aria-pressed="false" title="Start a voice conversation">' + MIC_SVG + '<span>Voice chat</span></button>' +
         '<label for="askme-input" class="sr-only">Your message</label>' +
         '<input id="askme-input" type="text" maxlength="300" placeholder="Ask me anything about my work" />' +
         '<button type="submit" class="btn btn-primary !py-2 !px-3">Send</button>' +
@@ -315,8 +336,24 @@
     add('bot', "<p>Hi, I'm Prashanth. What would you like to know?</p>");
     suggest.innerHTML = SUGGEST.map(function (s) { return '<button type="button" class="chip">' + esc(s) + '</button>'; }).join('');
   }
-  function open() { panel.hidden = false; openBtn.setAttribute('aria-expanded', 'true'); greet(); setTimeout(function () { input.focus(); }, 50); }
-  function close() { panel.hidden = true; openBtn.setAttribute('aria-expanded', 'false'); stopSpeaking(); openBtn.focus(); }
+  function open(auto) {
+    warmRelay(); panel.hidden = false; openBtn.setAttribute('aria-expanded', 'true'); greet();
+    if (!auto) { setTimeout(function () { input.focus(); }, 50); }        // opened by itself: do not pop up a phone keyboard
+  }
+  function close() {
+    panel.hidden = true; openBtn.setAttribute('aria-expanded', 'false'); stopSpeaking();
+    if (window.PORTFOLIO_LIVE && window.PORTFOLIO_LIVE.active()) { window.PORTFOLIO_LIVE.stop('closed'); }
+    openBtn.focus();
+  }
+  // Opens by itself the first time the visitor scrolls (once per visit; a closed panel stays closed).
+  var AUTO_KEY = 'talkAutoOpened';
+  function firstScroll() {
+    if (window.scrollY < 120) { return; }
+    window.removeEventListener('scroll', firstScroll);
+    var seen = null; try { seen = sessionStorage.getItem(AUTO_KEY); sessionStorage.setItem(AUTO_KEY, '1'); } catch (e) {}
+    if (!seen && panel.hidden) { open(true); }
+  }
+  window.addEventListener('scroll', firstScroll, { passive: true });
   openBtn.addEventListener('click', function () { panel.hidden ? open() : close(); });
   closeBtn.addEventListener('click', close);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { close(); } });
@@ -386,7 +423,7 @@
   function neuralOk() { return !!(NEURAL && useNeural && NEURAL.supported() && !NEURAL.failed()); }
   function warmVoice() { return neuralOk() ? NEURAL.warm().catch(function () {}) : Promise.resolve(); }
   function speak(text, opts) {
-    stopSpeaking();
+    if (window.speechSynthesis && window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); }   // NEURAL.speak stops its own audio but lets a filler finish
     if (neuralOk()) {
       if (!NEURAL.ready()) { NEURAL.warm().catch(function () {}); return browserSpeak(text); }   // first answers use the device voice while the natural one downloads
       return NEURAL.speak(spoken(text), opts).catch(function () { return browserSpeak(text); });
@@ -444,6 +481,7 @@
   }
   voicesReady().then(fillVoicePicker);
   if (window.speechSynthesis) { var prev = window.speechSynthesis.onvoiceschanged; window.speechSynthesis.onvoiceschanged = function () { if (prev) { prev(); } fillVoicePicker(); }; }
+  function filler() { return neuralOk() && NEURAL.ready() && NEURAL.filler(); }
   function stopSpeaking() { if (NEURAL) { NEURAL.stop(); } if (window.speechSynthesis && window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); } }
   if (!window.speechSynthesis) { speakBtn.hidden = true; }
   var voiceSel = document.getElementById('askme-voice');
@@ -462,75 +500,56 @@
     add('user', '<p>' + esc(q) + '</p>');
     input.value = '';
     lastVoiceQuestion = !!spokenQ;
-    var local = answer(q);
+    var local = answer(q), way = route(q);
     var el = add('bot', '<p class="askme-thinking">...</p>');
     function show(text) {
+      turns.push({ role: 'user', text: q }, { role: 'bot', text: text });
       el.innerHTML = '<p>' + esc(text) + '</p>';
       log.scrollTop = log.scrollHeight;
       if (!silent && (speakOn || lastVoiceQuestion)) { speak(text); }
       return text;
     }
-    return remoteAnswer(q, local).then(show).catch(function () { return show(local.text); });
+    if (way === 'reject') { return Promise.resolve(show(REJECT)); }
+    return Promise.resolve(show(local.text));          // typed chat is static: built-in answers only, no quota
   }
-  window.PORTFOLIO_CHAT_API = { answer: answer, ask: ask, speak: speak, peek: peek, prefetch: prefetch, warmVoice: warmVoice, voices: allVoices, voice: voice, spoken: function (t) { return spoken(t); }, stopSpeaking: stopSpeaking, open: open, close: close, isOpen: function () { return !panel.hidden; } };
+  window.PORTFOLIO_CHAT_API = { answer: answer, ask: ask, speak: speak, peek: peek, prefetch: prefetch, warmVoice: warmVoice, warmRelay: warmRelay, route: route, filler: filler, voices: allVoices, voice: voice, spoken: function (t) { return spoken(t); }, stopSpeaking: stopSpeaking, open: open, close: close, isOpen: function () { return !panel.hidden; } };
   form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value, false); });
 
-  /* ---------- voice in: Whisper in the browser, browser recognizer as fallback; tap to start, tap to stop ---------- */
-  var asr = null, asrLoading = null, rec = null, chunks = [], autoStop = null;
-  var MODEL = CFG.whisperModel || 'Xenova/whisper-tiny.en';
-  function loadWhisper() {
-    if (asr) { return Promise.resolve(asr); }
-    if (asrLoading) { return asrLoading; }
-    status.textContent = 'Getting my ears ready (first time only)...';
-    asrLoading = import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js').then(function (T) {
-      T.env.allowLocalModels = false;
-      return T.pipeline('automatic-speech-recognition', MODEL, {
-        progress_callback: function (p) { if (p && p.status === 'progress' && p.file && /onnx/.test(p.file)) { status.textContent = 'Getting my ears ready... ' + Math.round(p.progress || 0) + '%'; } }
-      });
-    }).then(function (p) { asr = p; status.textContent = ''; return p; })
-      .catch(function (err) { asrLoading = null; throw err; });
+  /* ---------- voice chat: a live conversation with Gemini (live.js), transcribed into the log ---------- */
+  var liveState = 'off', userEl = null, botEl = null;
+  function liveUI() {
+    mic.setAttribute('aria-pressed', String(liveState !== 'off'));
+    mic.querySelector('span').textContent = liveState === 'off' ? 'Voice chat' : liveState === 'connecting' ? 'Connecting...' : 'End voice chat';
+    mic.classList.toggle('askme-voice-on', liveState === 'on');
   }
-  function toPCM16k(blob) {
-    return blob.arrayBuffer().then(function (buf) {
-      var AC = window.AudioContext || window.webkitAudioContext; var ac = new AC();
-      return ac.decodeAudioData(buf).then(function (audio) {
-        var off = new OfflineAudioContext(1, Math.ceil(audio.duration * 16000), 16000);
-        var src = off.createBufferSource(); src.buffer = audio; src.connect(off.destination); src.start();
-        return off.startRendering();
-      }).then(function (r) { try { ac.close(); } catch (e) {} return r.getChannelData(0); });
+  function bubble(role, el, text) {
+    if (!el) { el = add(role, '<p></p>'); }
+    el.firstChild.textContent = text; log.scrollTop = log.scrollHeight; return el;
+  }
+  function voiceChat() {
+    var L = window.PORTFOLIO_LIVE;
+    if (liveState !== 'off') { if (L) { L.stop('ended'); } return; }
+    if (!L || !L.supported()) { status.textContent = 'Voice chat needs a recent Chrome, Edge or Safari. Typing works everywhere.'; return; }
+    stopSpeaking(); greet(); suggest.innerHTML = '';
+    liveState = 'connecting'; liveUI(); status.textContent = 'Connecting... allow the microphone if your browser asks.';
+    L.prefetch().then(function (p) {
+      if (!p) { throw new Error('busy'); }
+      return L.start({ on: {
+        user: function (t) { if (botEl) { userEl = null; botEl = null; } userEl = bubble('user', userEl, t); status.textContent = 'Listening...'; },
+        bot: function (t) { botEl = bubble('bot', botEl, t); },
+        turn: function (x) { if (x.user) { turns.push({ role: 'user', text: x.user }); } if (x.bot) { turns.push({ role: 'bot', text: x.bot }); } userEl = null; botEl = null; },
+        speaking: function (on) { status.textContent = on ? 'Speaking... talk any time to interrupt.' : 'Listening... just talk.'; },
+        end: function (why) {
+          liveState = 'off'; userEl = null; botEl = null; liveUI();
+          status.textContent = why === 'idle' ? 'Voice chat ended after a quiet moment. Tap Voice chat to talk again.' :
+            why === 'limit' ? 'That voice chat reached its time limit. Tap Voice chat to start another.' : '';
+        } } });
+    }).then(function () {
+      liveState = 'on'; liveUI(); status.textContent = "Listening... just talk. Say hi, or ask about my work.";
+    }).catch(function () {
+      liveState = 'off'; liveUI();
+      status.textContent = 'Voice chat is busy right now, so please type. You will still get answers.';
     });
   }
-  function browserSpeech() {
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { status.textContent = 'This browser has no speech input, so please type.'; return; }
-    var r = new SR(); r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 1;
-    status.textContent = 'Listening...'; mic.setAttribute('aria-pressed', 'true');
-    r.onresult = function (e) { var t = e.results[0][0].transcript; status.textContent = ''; ask(t, true); };
-    r.onerror = function () { status.textContent = "I didn't catch that. Try again or type."; };
-    r.onend = function () { mic.setAttribute('aria-pressed', 'false'); };
-    r.start();
-  }
-  function startRec() {
-    stopSpeaking();
-    if (!navigator.mediaDevices || !window.MediaRecorder) { browserSpeech(); return; }
-    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (s) {
-      chunks = []; rec = new MediaRecorder(s);
-      rec.ondataavailable = function (e) { if (e.data && e.data.size) { chunks.push(e.data); } };
-      rec.onstop = function () {
-        var blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' }); rec = null; clearTimeout(autoStop);
-        s.getTracks().forEach(function (t) { t.stop(); });
-        mic.setAttribute('aria-pressed', 'false');
-        if (blob.size < 2000) { status.textContent = 'Tap the mic, say your question, tap again.'; return; }
-        status.textContent = 'One second...';
-        loadWhisper().then(function (p) { return toPCM16k(blob).then(function (pcm) { return p(pcm); }); })
-          .then(function (out) { var t = (out && out.text || '').trim(); status.textContent = ''; if (!t || /^\[.*\]$/.test(t)) { status.textContent = "I didn't catch that. Try again or type."; return; } ask(t, true); })
-          .catch(function () { status.textContent = ''; browserSpeech(); });
-      };
-      rec.start(); mic.setAttribute('aria-pressed', 'true'); status.textContent = 'Listening... tap the mic again when you are done.';
-      autoStop = setTimeout(stopRec, 15000);
-      loadWhisper().catch(function () {});
-    }).catch(function () { status.textContent = 'Microphone access was refused, so please type.'; });
-  }
-  function stopRec() { if (rec && rec.state === 'recording') { rec.stop(); } }
-  mic.addEventListener('click', function () { if (rec) { stopRec(); } else { startRec(); } });
+  mic.addEventListener('click', voiceChat);
 })();

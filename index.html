@@ -109,7 +109,7 @@
         <li><a class="nav-link" href="#experience">Experience</a></li>
         <li><a class="nav-link" href="#education">Education</a></li>
         <li><a class="nav-link" href="#contact">Contact</a></li>
-        <li><a class="nav-link" href="#ask">Ask me</a></li>
+        <li><a class="nav-link" href="#ask">Talk to me</a></li>
       </ul>
       <div class="flex items-center gap-2">
         <a id="nav-resume" href="Prashanth_kumar_sirusala.pdf" download class="btn btn-secondary hidden !py-1.5 !px-3 text-sm sm:inline-flex">
@@ -278,12 +278,13 @@
 
   <script src="data.js"></script>
   <script src="kb.js"></script>
-  <!-- Optional: point the chat at the Cloudflare worker in chat-worker/ to have an open model phrase the answers.
-       <script>window.PORTFOLIO_CHAT = { endpoint: "https://portfolio-chat.YOUR-SUBDOMAIN.workers.dev" };</script> -->
+  <!-- Chat answers: Gemini Flash-Lite (free tier) through the Apps Script relay in chat-relay/. Falls back to the
+       built-in answers when it is slow, over its daily cap, or unreachable. -->
+  <script>window.PORTFOLIO_CHAT = { endpoint: "https://script.google.com/macros/s/AKfycbwV_rjYBlJvRSSlQ9D06kOiO8n71wBpn_paaYy41vWas2fIQJeaGvDqsaKEF6Ffmod6/exec" };</script>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
   <script src="app.js" defer></script>
   <script src="tts.js" defer></script>
   <script src="chat.js" defer></script>
-  <script src="voice.js" defer></script>
+  <script src="live.js" defer></script>
 </body>
 </html>

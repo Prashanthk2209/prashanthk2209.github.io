@@ -176,40 +176,16 @@ html.dark .askme-status { color: #94a3b8; }
 html.dark .hero-photo { border-color: #0f172a; box-shadow: 0 10px 30px rgba(0, 0, 0, .4), 0 0 0 1px #1e293b; }
 @media (max-width: 1023px) { .hero-photo { width: 8.5rem; height: 8.5rem; } }
 
-/* "Hey Prashanth" hands-free mode (voice.js) */
-.heyp-border { position: fixed; inset: 0; z-index: 70; pointer-events: none; opacity: 0; transition: opacity .35s ease; padding: 6px; border-radius: 0;
-  background: conic-gradient(from var(--heyp-angle, 0deg), #14b8a6, #6366f1, #ec4899, #f59e0b, #22d3ee, #14b8a6);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; }
-@property --heyp-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
-@keyframes heyp-spin { to { --heyp-angle: 360deg; } }
-@keyframes heyp-breathe { 0%, 100% { padding: 5px; opacity: .85; } 50% { padding: 9px; opacity: 1; } }
-html[data-voice="waking"] .heyp-border, html[data-voice="listening"] .heyp-border { opacity: 1; animation: heyp-spin 3s linear infinite, heyp-breathe 1.6s ease-in-out infinite; }
-html[data-voice="thinking"] .heyp-border { opacity: 1; animation: heyp-spin .9s linear infinite; padding: 6px; }
-html[data-voice="speaking"] .heyp-border { opacity: 1; animation: heyp-spin 6s linear infinite, heyp-breathe 2.4s ease-in-out infinite; }
-.heyp-caption { position: fixed; left: 50%; bottom: 5.5rem; z-index: 71; transform: translateX(-50%); width: min(44rem, calc(100vw - 2rem)); display: grid; gap: .4rem; pointer-events: none; }
-.heyp-q, .heyp-a { border-radius: 1rem; padding: .7rem 1rem; font-size: 1.05rem; line-height: 1.5; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(15, 23, 42, .18); }
-.heyp-q { justify-self: end; background: rgba(15, 118, 110, .92); color: #fff; font-weight: 500; max-width: 85%; }
-.heyp-a { justify-self: start; background: rgba(255, 255, 255, .92); color: #0f172a; border: 1px solid rgba(226, 232, 240, .9); }
-html.dark .heyp-a { background: rgba(15, 23, 42, .92); color: #f1f5f9; border-color: rgba(51, 65, 85, .9); }
-.heyp-pill { position: fixed; left: 1rem; bottom: 1rem; z-index: 60; display: inline-flex; align-items: center; gap: .5rem; padding: .5rem .85rem; border-radius: 9999px; font-size: .82rem; font-weight: 500; color: #334155; background: rgba(255, 255, 255, .9); border: 1px solid #e2e8f0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 4px 14px rgba(15, 23, 42, .08); max-width: calc(100vw - 9rem); }
-html.dark .heyp-pill { color: #e2e8f0; background: rgba(15, 23, 42, .9); border-color: #334155; }
-.heyp-dot { width: .55rem; height: .55rem; border-radius: 9999px; background: #94a3b8; flex: none; }
-html[data-voice="idle"] .heyp-dot { background: #14b8a6; box-shadow: 0 0 0 0 rgba(20, 184, 166, .5); animation: heyp-dot 2.4s ease-out infinite; }
-html[data-voice="waking"] .heyp-dot, html[data-voice="listening"] .heyp-dot { background: #ef4444; animation: heyp-dot 1s ease-out infinite; }
-html[data-voice="thinking"] .heyp-dot { background: #6366f1; animation: heyp-dot .7s ease-out infinite; }
-html[data-voice="speaking"] .heyp-dot { background: #14b8a6; animation: heyp-dot 1.4s ease-out infinite; }
-@keyframes heyp-dot { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, .45); } 100% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } }
-@media (max-width: 640px) { .heyp-pill { bottom: 4.6rem; left: 50%; transform: translateX(-50%); max-width: calc(100vw - 2rem); } .heyp-caption { bottom: 8.5rem; } }
-@media (prefers-reduced-motion: reduce) { .heyp-border, .heyp-dot { animation-duration: 8s !important; } }
-@media print { #heyp { display: none !important; } }
-
-/* invite state of the voice pill (first visit) and the debug log */
-.heyp-pill-invite { background: #0f766e !important; color: #fff !important; border-color: #0f766e !important; font-size: .95rem; padding: .7rem 1.1rem; box-shadow: 0 10px 30px rgba(15, 118, 110, .35); animation: heyp-invite 1.8s ease-in-out infinite; }
-html.dark .heyp-pill-invite { background: #2dd4bf !important; color: #042f2e !important; border-color: #2dd4bf !important; }
-.heyp-pill-invite .heyp-dot { background: #fff; }
-@keyframes heyp-invite { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-@media (max-width: 640px) { .heyp-pill-invite { transform: translateX(-50%); } @keyframes heyp-invite { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-3px); } } }
-.heyp-debug { position: fixed; left: 1rem; top: 5rem; z-index: 80; width: min(34rem, calc(100vw - 2rem)); max-height: 40vh; overflow: auto; font: 12px/1.4 'JetBrains Mono', monospace; background: rgba(2, 6, 23, .88); color: #a7f3d0; border-radius: .6rem; padding: .6rem .8rem; }
 
 .askme-voice { max-width: 9.5rem; font-size: .78rem; border: 1px solid #e2e8f0; border-radius: .6rem; padding: .35rem .5rem; background: #fff; color: #334155; }
 html.dark .askme-voice { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+
+/* "Voice chat" button in the Talk to me panel (live.js) */
+.askme-voicebtn { display: inline-flex; align-items: center; gap: .4rem; height: 2.5rem; padding: 0 .75rem; border-radius: .625rem; border: 1px solid #0f766e; color: #0f766e; background: #f0fdfa; font-size: .85rem; font-weight: 600; white-space: nowrap; }
+.askme-voicebtn:hover { background: #ccfbf1; }
+.askme-voicebtn svg { height: 1.05rem; width: 1.05rem; }
+html.dark .askme-voicebtn { border-color: #5eead4; color: #5eead4; background: #042f2e; }
+.askme-voicebtn[aria-pressed="true"] { background: #fee2e2; border-color: #ef4444; color: #b91c1c; }
+.askme-voicebtn.askme-voice-on { animation: askme-pulse 1.2s ease-in-out infinite; }
+html.dark .askme-voicebtn[aria-pressed="true"] { background: #450a0a; border-color: #f87171; color: #fecaca; }
+@media (max-width: 420px) { .askme-voicebtn span { display: none; } .askme-voicebtn { padding: 0 .6rem; } }

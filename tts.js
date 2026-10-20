@@ -120,29 +120,31 @@
     sources.push(src); src.start(at);
     return { src: src, end: at + buf.duration };
   }
-  function stop() {
+  function stop(keepFiller) {
     token++;
-    sources.forEach(function (s) { try { s.onended = null; s.stop(); } catch (e) {} });
-    sources = [];
+    if (!keepFiller) { fillerEnd = 0; }
+    sources.filter(function (s) { return !keepFiller || !s.isFiller; }).forEach(function (s) { try { s.onended = null; s.stop(); } catch (e) {} });
+    sources = keepFiller ? sources.filter(function (s) { return s.isFiller; }) : [];
     var pending = liveIds.filter(function (id) { return jobs[id]; });
     if (pending.length && worker) { worker.postMessage({ type: 'drop', ids: pending }); }
     liveIds = [];
   }
   function speak(text, opts) {
     opts = opts || {};
-    stop();
+    stop(true);                                   // a filler already playing is allowed to finish
     var my = token;
     return warm().then(function () {
       if (token !== my) { return; }
       var entries = chunks(text).map(function (c) { return synth(c, 0); });   // queue every piece now: built in the background
       liveIds = entries.map(function (e) { return e.id; });
-      var ac = ctx(), at = ac.currentTime + 0.02, last = null;
+      var ac = ctx(), at = Math.max(ac.currentTime + 0.02, fillerEnd + 0.05), last = null;
+      if (fillerEnd > ac.currentTime) { opts.filler = false; }
       var start = Promise.resolve();
       if (opts.filler && entries.length && !entries[0].data) {
         start = Promise.race([entries[0].promise, new Promise(function (r) { setTimeout(r, FILLER_WAIT_MS); })]).then(function () {
           if (token !== my || entries[0].data) { return; }
           var f = cache.get(voiceId + '|' + FILLERS[fillerTurn++ % FILLERS.length]);
-          if (f && f.data) { last = schedule(f, ac.currentTime + 0.01); at = last.end + 0.05; }
+          if (f && f.data) { last = schedule(f, ac.currentTime + 0.01); last.src.isFiller = true; at = last.end + 0.05; }
         });
       }
       var chain = start;
@@ -165,13 +167,21 @@
       });
     });
   }
+  // Play one pre-made filler now ("Sure.") while the answer is still being looked up. Returns false if none is ready.
+  var fillerEnd = 0;
+  function filler() {
+    if (!ready) { return false; }
+    var f = cache.get(voiceId + '|' + FILLERS[fillerTurn++ % FILLERS.length]);
+    if (!f || !f.data) { return false; }
+    var ac = ctx(), s = schedule(f, ac.currentTime + 0.01); s.src.isFiller = true; fillerEnd = s.end; return true;
+  }
   function prefetch(text, pieces, prio) {
     if (!ready) { return; }
     chunks(text).slice(0, pieces || 2).forEach(function (c) { synth(c, prio == null ? 2 : prio); });
   }
 
   window.PORTFOLIO_TTS = {
-    warm: warm, speak: speak, stop: stop, prefetch: prefetch, chunks: chunks, stats: function () { return stats.slice(); },
+    warm: warm, speak: speak, stop: function () { stop(false); }, filler: filler, prefetch: prefetch, chunks: chunks, stats: function () { return stats.slice(); },
     ready: function () { return ready; }, failed: function () { return failed; }, supported: supported,
     cached: function (text) { var e = cache.get(voiceId + '|' + text); return !!(e && e.data); },
     voices: function () { return VOICES.slice(); },
