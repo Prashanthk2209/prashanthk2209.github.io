@@ -182,6 +182,7 @@
       if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); }   // permission is what we wanted; the recognizer opens its own
       try { localStorage.setItem(PREF_KEY, 'on'); } catch (e) {}
       recWanted = true; setState('idle'); startRec(); pill.classList.remove('heyp-pill-invite');
+      if (API.warmVoice) { API.warmVoice(); }          // start downloading the natural voice now, not at the first answer
       if (fromClick) {
         chime(true);
         var hello = 'Voice is on. Say hello, then ask me anything.';

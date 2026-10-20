@@ -88,3 +88,12 @@ automated requests, which is its bot response, not a broken link); no `<img>` wi
   listening / thinking / speaking), live captions (question right, answer left), the answer through chat.js (same
   knowledge, same male voice), then 14 s of follow-up listening before a down-chime and sleep. Recognition is paused
   while speaking so the page never answers itself. Whisper stays behind the mic button in the chat panel.
+- 2026-10-19 (natural voice): `tts.js` runs Kokoro-82M (Apache-2.0) in the browser through kokoro-js (jsDelivr ESM),
+  q8 ONNX, about 90 MB downloaded once and cached. Answers are synthesized clause by clause (first chunk <= 55 chars so
+  speech starts in about 2-4 s) and the next chunk is generated while the current one plays. Default voice am_michael;
+  ten male voices selectable in the chat header; choice and engine (neural/browser) remembered in localStorage.
+  While the model is still downloading, answers use the device voice so nothing waits. `coi-serviceworker.js`
+  (MIT, Guido Zuidhof) gives the page cross-origin isolation in credentialless mode so the WASM runtime can use
+  several threads: measured 9.5 s of audio in 6.7 s isolated vs 13.9 s single-threaded on this Mac. Not registered
+  on Safari (no credentialless COEP), where it falls back to single-threaded synthesis. Probe under isolation: Tailwind,
+  Google Fonts, Lucide icons, chat, voice pill and photo all load.

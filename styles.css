@@ -210,3 +210,6 @@ html.dark .heyp-pill-invite { background: #2dd4bf !important; color: #042f2e !im
 @keyframes heyp-invite { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
 @media (max-width: 640px) { .heyp-pill-invite { transform: translateX(-50%); } @keyframes heyp-invite { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-3px); } } }
 .heyp-debug { position: fixed; left: 1rem; top: 5rem; z-index: 80; width: min(34rem, calc(100vw - 2rem)); max-height: 40vh; overflow: auto; font: 12px/1.4 'JetBrains Mono', monospace; background: rgba(2, 6, 23, .88); color: #a7f3d0; border-radius: .6rem; padding: .6rem .8rem; }
+
+.askme-voice { max-width: 9.5rem; font-size: .78rem; border: 1px solid #e2e8f0; border-radius: .6rem; padding: .35rem .5rem; background: #fff; color: #334155; }
+html.dark .askme-voice { background: #0f172a; border-color: #334155; color: #e2e8f0; }

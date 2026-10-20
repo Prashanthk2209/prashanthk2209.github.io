@@ -286,6 +286,7 @@
       '<span>Ask me</span></button>' +
     '<section id="askme-panel" class="askme-panel card" role="dialog" aria-modal="false" aria-labelledby="askme-title" hidden>' +
       '<header class="askme-head"><h2 id="askme-title">Chat with Prashanth</h2><div class="askme-tools">' +
+        '<label class="sr-only" for="askme-voice">Voice</label><select id="askme-voice" class="askme-voice" title="Voice" hidden></select>' +
         '<button id="askme-speak" type="button" class="icon-btn" aria-label="Read answers aloud" aria-pressed="false" title="Read answers aloud">' + SPK_SVG + '</button>' +
         '<button id="askme-close" type="button" class="icon-btn" aria-label="Close">&#x2715;</button></div></header>' +
       '<div id="askme-log" class="askme-log" aria-live="polite" aria-relevant="additions"></div>' +
@@ -323,13 +324,41 @@
 
   /* ---------- voice out ---------- */
   var speakOn = false, lastVoiceQuestion = false;
-  function voice() {
+  var VOICE_KEY = 'voiceName', chosenVoice = null;
+  try { chosenVoice = localStorage.getItem(VOICE_KEY); } catch (e) { chosenVoice = null; }
+  var NOVELTY = /fred|tom\b|rocko|eddy|reed|evan|gordon|flo\b|grandpa|grandma|sandy|shelley|junior|ralph|albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|kathy|princess|hysterical|ralph|junior/i;
+  function allVoices() {
     var vs = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-    // Male English voices first (the names differ per OS and browser), then any male-sounding English voice.
-    var pref = ['Google UK English Male', 'Microsoft Guy Online', 'Microsoft Guy', 'Microsoft Ryan Online', 'Microsoft David', 'Microsoft Mark', 'Daniel', 'Alex', 'Aaron', 'Arthur', 'Rishi', 'Fred', 'Tom', 'Oliver', 'Reed', 'Rocko', 'Eddy', 'Evan', 'James', 'Gordon', 'Lee'];
-    for (var i = 0; i < pref.length; i++) { var v = vs.filter(function (x) { return /^en/i.test(x.lang) && x.name.indexOf(pref[i]) === 0; })[0]; if (v) { return v; } }
-    var male = vs.filter(function (x) { return /^en/i.test(x.lang) && /male|\b(david|mark|guy|daniel|alex|aaron|arthur|rishi|fred|tom|oliver|james|ryan|brian|george|matthew|liam|noah)\b/i.test(x.name) && !/female/i.test(x.name); })[0];
-    return male || vs.filter(function (x) { return /^en[-_]US/i.test(x.lang); })[0] || vs.filter(function (x) { return /^en/i.test(x.lang); })[0] || null;
+    return vs.filter(function (v) { return /^en/i.test(v.lang) && !NOVELTY.test(v.name); });
+  }
+  function rank(v) {
+    // higher is better: natural/online voices, then Google, then the good system voices; male names first
+    var n = v.name, s = 0;
+    if (/natural/i.test(n)) { s += 50; }
+    if (/online/i.test(n)) { s += 20; }
+    if (/^Google/.test(n)) { s += 30; }
+    if (/premium|enhanced/i.test(n)) { s += 25; }
+    if (/male/i.test(n) && !/female/i.test(n)) { s += 15; }
+    if (/\b(guy|ryan|andrew|brian|christopher|eric|roger|steffan|david|mark|daniel|alex|aaron|arthur|rishi|oliver|james|george|matthew|liam|noah|thomas)\b/i.test(n)) { s += 12; }
+    if (/female|zira|aria|jenny|michelle|ana|emma|ava|samantha|karen|moira|tessa|fiona|victoria|susan|allison|kate|serena|libby|sonia|natasha|hazel/i.test(n)) { s -= 30; }
+    if (/^en[-_](US|GB)/i.test(v.lang)) { s += 5; }
+    if (/en[-_]IN/i.test(v.lang)) { s += 3; }
+    return s;
+  }
+  function voice() {
+    var vs = allVoices();
+    if (!vs.length) { return null; }
+    if (chosenVoice) { var pick = vs.filter(function (v) { return v.name === chosenVoice; })[0]; if (pick) { return pick; } }
+    vs.sort(function (a, b) { return rank(b) - rank(a); });
+    return vs[0];
+  }
+  function voicesReady() {
+    if (!window.speechSynthesis) { return Promise.resolve(); }
+    if (window.speechSynthesis.getVoices().length) { return Promise.resolve(); }
+    return new Promise(function (resolve) {
+      var done = false; function fin() { if (!done) { done = true; resolve(); } }
+      window.speechSynthesis.onvoiceschanged = fin; setTimeout(fin, 1500);
+    });
   }
   function spoken(t) {
     // What the voice says. The screen keeps the written form; this is only for the ear.
@@ -347,22 +376,61 @@
       .replace(/\bS3\b/g, 'S 3').replace(/\bPySpark\b/g, 'Pie Spark').replace(/\bSnowPro\b/g, 'Snow Pro').replace(/\bJobHub\b/g, 'Job Hub')
       .replace(/\s*:\s*/g, ': ').replace(/\s+/g, ' ');
   }
+  var NEURAL = window.PORTFOLIO_TTS;
+  var useNeural = true;
+  try { useNeural = localStorage.getItem('voiceEngine') !== 'browser'; } catch (e) {}
+  if (NEURAL) { NEURAL.onStatus(function (msg) { status.textContent = msg || ''; }); }
+  function neuralOk() { return !!(NEURAL && useNeural && NEURAL.supported() && !NEURAL.failed()); }
+  function warmVoice() { return neuralOk() ? NEURAL.warm().catch(function () {}) : Promise.resolve(); }
   function speak(text) {
-    if (!window.speechSynthesis) { return Promise.resolve(); }
     stopSpeaking();
-    return new Promise(function (resolve) {
+    if (neuralOk()) {
+      if (!NEURAL.ready()) { NEURAL.warm().catch(function () {}); return browserSpeak(text); }   // first answers use the device voice while the natural one downloads
+      return NEURAL.speak(text).catch(function () { return browserSpeak(text); });
+    }
+    return browserSpeak(text);
+  }
+  function browserSpeak(text) {
+    if (!window.speechSynthesis) { return Promise.resolve(); }
+    return voicesReady().then(function () { return new Promise(function (resolve) {
       var u = new SpeechSynthesisUtterance(spoken(text).slice(0, 1000));
-      var v = voice(); if (v) { u.voice = v; }
-      u.rate = 1.0; u.pitch = 0.95;
+      var v = voice(); if (v) { u.voice = v; u.lang = v.lang; }
+      u.rate = 1.0; u.pitch = 1.0; u.volume = 1.0;
       var done = false; function fin() { if (!done) { done = true; resolve(); } }
       u.onend = fin; u.onerror = fin;
       window.speechSynthesis.speak(u);
-      setTimeout(fin, 60000);
-    });
+      // Chrome stops long utterances after ~15 s unless nudged; resume keeps it talking
+      var keep = setInterval(function () { if (done) { clearInterval(keep); return; } if (window.speechSynthesis.paused) { window.speechSynthesis.resume(); } }, 5000);
+      setTimeout(fin, 90000);
+    }); });
   }
-  if (window.speechSynthesis && typeof window.speechSynthesis.getVoices === 'function') { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = function () {}; }
-  function stopSpeaking() { if (window.speechSynthesis && window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); } }
+  if (window.speechSynthesis && typeof window.speechSynthesis.getVoices === 'function') { window.speechSynthesis.getVoices(); }
+  /* voice picker: every English voice on this device, best guess preselected, choice remembered */
+  function fillVoicePicker() {
+    var sel = document.getElementById('askme-voice'); if (!sel) { return; }
+    var html = '';
+    if (NEURAL && NEURAL.supported()) {
+      html += '<optgroup label="Natural voice (on this device)">' + NEURAL.voices().map(function (v) {
+        return '<option value="neural:' + v.id + '"' + (useNeural && v.id === NEURAL.voiceName() ? ' selected' : '') + '>' + esc(v.label) + '</option>'; }).join('') + '</optgroup>';
+    }
+    var vs = allVoices().sort(function (a, b) { return rank(b) - rank(a); }), best = voice();
+    if (vs.length) {
+      html += '<optgroup label="Browser voices">' + vs.map(function (v) { return '<option value="browser:' + esc(v.name) + '"' + (!useNeural && best && v.name === best.name ? ' selected' : '') + '>' + esc(v.name.replace(/Microsoft |Google |Online|\(Natural\)/g, '').trim()) + ' (' + esc(v.lang) + ')</option>'; }).join('') + '</optgroup>';
+    }
+    if (!html) { sel.hidden = true; return; }
+    sel.innerHTML = html; sel.hidden = false;
+  }
+  voicesReady().then(fillVoicePicker);
+  if (window.speechSynthesis) { var prev = window.speechSynthesis.onvoiceschanged; window.speechSynthesis.onvoiceschanged = function () { if (prev) { prev(); } fillVoicePicker(); }; }
+  function stopSpeaking() { if (NEURAL) { NEURAL.stop(); } if (window.speechSynthesis && window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); } }
   if (!window.speechSynthesis) { speakBtn.hidden = true; }
+  var voiceSel = document.getElementById('askme-voice');
+  voiceSel.addEventListener('change', function () {
+    var val = voiceSel.value || '';
+    if (val.indexOf('neural:') === 0) { useNeural = true; NEURAL.setVoice(val.slice(7)); try { localStorage.setItem('voiceEngine', 'neural'); } catch (e) {} }
+    else { useNeural = false; chosenVoice = val.slice(8); try { localStorage.setItem(VOICE_KEY, chosenVoice); localStorage.setItem('voiceEngine', 'browser'); } catch (e) {} }
+    speak('This is how I sound now. Ask me anything about my work.');
+  });
   speakBtn.addEventListener('click', function () { speakOn = !speakOn; speakBtn.setAttribute('aria-pressed', String(speakOn)); if (!speakOn) { stopSpeaking(); } status.textContent = speakOn ? 'I will read my answers aloud.' : ''; setTimeout(function () { if (!speakOn) { status.textContent = ''; } }, 1500); });
 
   function ask(q, spokenQ, silent) {
@@ -382,7 +450,7 @@
     }
     return remoteAnswer(q, local).then(show).catch(function () { return show(local.text); });
   }
-  window.PORTFOLIO_CHAT_API = { answer: answer, ask: ask, speak: speak, spoken: function (t) { return spoken(t); }, stopSpeaking: stopSpeaking, open: open, close: close, isOpen: function () { return !panel.hidden; } };
+  window.PORTFOLIO_CHAT_API = { answer: answer, ask: ask, speak: speak, warmVoice: warmVoice, voices: allVoices, voice: voice, spoken: function (t) { return spoken(t); }, stopSpeaking: stopSpeaking, open: open, close: close, isOpen: function () { return !panel.hidden; } };
   form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value, false); });
 
   /* ---------- voice in: Whisper in the browser, browser recognizer as fallback; tap to start, tap to stop ---------- */

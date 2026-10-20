@@ -25,6 +25,17 @@
   <meta name="twitter:image" content="https://prashanthk2209.github.io/og.png">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f766e'/%3E%3Ctext x='32' y='41' font-family='Inter,Arial,sans-serif' font-size='28' font-weight='700' fill='white' text-anchor='middle'%3EPS%3C/text%3E%3C/svg%3E">
 
+  <!-- Cross-origin isolation (lets the in-browser voice use several CPU threads). Credentialless mode keeps the CDN
+       assets working; Safari lacks it, so the worker is not registered there and speech runs single-threaded. -->
+  <script>
+    window.coi = {
+      coepCredentialless: function () { return true; },
+      shouldRegister: function () { return !/^((?!chrome|android|crios|fxios).)*safari/i.test(navigator.userAgent); },
+      doReload: function () { window.location.reload(); },
+      quiet: true
+    };
+  </script>
+  <script src="coi-serviceworker.js"></script>
   <!-- Theme before first paint: stored choice wins, else system preference. -->
   <script>
     (function () {
@@ -271,6 +282,7 @@
        <script>window.PORTFOLIO_CHAT = { endpoint: "https://portfolio-chat.YOUR-SUBDOMAIN.workers.dev" };</script> -->
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
   <script src="app.js" defer></script>
+  <script src="tts.js" defer></script>
   <script src="chat.js" defer></script>
   <script src="voice.js" defer></script>
 </body>
