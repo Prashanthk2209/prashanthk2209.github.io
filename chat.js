@@ -147,6 +147,16 @@
 
   /* ---------- intents ---------- */
   var YESNO = /^(are|do|did|have|has|can|could|would|is|were|was)\b/i;
+  var SMALLTALK = [
+    { rx: /^(hello|hi|hey|hallo|good (morning|afternoon|evening)|yo|hiya)(\s+(there|prashanth|prashant))?[!.,?\s]*$/i, text: "Hi, I'm Prashanth. Ask me anything about my work, the Snowflake and AWS platforms, JobHub, or how to reach me." },
+    { rx: /\b(how are you|how('s| is) it going|how are things|how do you do|what's up|whats up|how have you been)\b/i, text: "Doing well, thanks for asking. I'm a data engineer in Miami, and I'm happy to talk through anything on my resume. What would you like to know?" },
+    { rx: /\b(are you there|can you hear me|you there|hear me|is this working|testing|test test|hello\?)\b/i, text: "I'm here and I can hear you. Go ahead and ask." },
+    { rx: /\b(who (is this|am i (talking|speaking) (to|with))|what are you|are you (a bot|an ai|a robot|real|human))\b/i, text: "I'm a voice assistant on Prashanth Kumar Sirusala's portfolio, speaking for him from his resume and work history. Nothing I say goes beyond what is on record." },
+    { rx: /\b(what can you (do|tell me|answer)|help me|how does this work|what should i ask)\b/i, text: "Ask me about my roles at Tech Detectives, Triangulum and Mindtree, the 17 billion row Snowflake work, the AWS pipelines, how I use AI, JobHub, my education and certifications, or how to contact me." },
+    { rx: /\b(thank you|thanks|thank u|appreciate it|cheers)\b/i, text: "You're welcome. If you want to take this further, my email is prashanthsirusala2209@gmail.com." },
+    { rx: /\b(bye|goodbye|see you|talk later|that's all|thats all|i'm done|im done|stop)\b/i, text: "Thanks for stopping by. My email and LinkedIn are at the bottom of the page whenever you're ready." },
+    { rx: /\b(nice to meet you|pleasure|good to meet)\b/i, text: "Likewise. What would you like to know about my work?" }
+  ];
   var INTENTS = [
     { rx: /\b(ai|llm|llms|genai|gen ai|language models?|machine learning|ml|claude|gpt|openai|agents?|chatbot|mcp)\b/i, topic: 'my AI work', run: function (q) {
         var b = KB.filter(function (c) { return c.kind === 'bullet' && /Claude|MCP|AI-assisted/.test(c.text); }).slice(0, 2);
@@ -213,6 +223,8 @@
     return a;
   }
   function answerCore(q) {
+    var hasTool = tokens(q).some(function (w) { return TOOLS[w]; });
+    if (!hasTool && tokens(q).length <= 6) { for (var s = 0; s < SMALLTALK.length; s++) { if (SMALLTALK[s].rx.test(q.trim())) { return { text: SMALLTALK[s].text, refs: [], topic: memory.entity }; } } }
     if (OFF_LIMITS.test(q)) {
       return { text: "Those are things I'd rather cover directly than on a web page. Email me at " + contactEmail() + ' and I will answer the same day.', refs: [] };
     }

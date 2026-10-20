@@ -1,4 +1,4 @@
-/* voice.js - "Hey Prashanth" hands-free mode for the portfolio.
+/* voice.js - "Hello" hands-free mode for the portfolio.
    The page asks for the microphone when it opens. While idle it listens only for the wake word using the browser's
    continuous speech recognizer (the one thing a browser can run all day for free). On "Hey Prashanth" the viewport
    gets an animated border, a short chime plays, the next sentence is taken as the question, the answer comes back
@@ -33,8 +33,16 @@
   function wakeIndex(text) {
     // returns the index (in words) just after the wake phrase, or -1
     var words = text.toLowerCase().replace(/[^a-z' ]/g, ' ').split(/\s+/).filter(Boolean);
+    // Primary wake phrase (user's choice, 2026-10-19): "hello", on its own or followed by the name.
+    for (var h = 0; h < words.length; h++) {
+      if (/^(hello|hallo|hullo|helo|allo)$/.test(words[h])) {
+        if (h + 1 < words.length && isName(words[h + 1])) { return h + 2; }
+        if (h + 2 < words.length && isName(words[h + 1] + words[h + 2])) { return h + 3; }
+        return h + 1;
+      }
+    }
     for (var i = 0; i < words.length; i++) {
-      var greet = /^(hey|hi|hello|ok|okay|yo|hay|a|hate)$/.test(words[i]);
+      var greet = /^(hey|hi|ok|okay|yo|hay|hate|he)$/.test(words[i]);
       if (greet && i + 1 < words.length && isName(words[i + 1])) { return i + 2; }
       if (greet && i + 2 < words.length && isName(words[i + 1] + words[i + 2])) { return i + 3; }
     }
@@ -52,15 +60,24 @@
     '<div id="heyp-border" class="heyp-border" aria-hidden="true"></div>' +
     '<div id="heyp-caption" class="heyp-caption" aria-live="polite" hidden><div class="heyp-q"></div><div class="heyp-a"></div></div>' +
     '<button id="heyp-pill" type="button" class="heyp-pill" aria-pressed="false">' +
-      '<span class="heyp-dot" aria-hidden="true"></span><span id="heyp-pill-text">Enable voice: say "Hey Prashanth"</span></button>';
+      '<span class="heyp-dot" aria-hidden="true"></span><span id="heyp-pill-text">Turn on voice: say "Hello"</span></button>' +
+    '<div id="heyp-debug" class="heyp-debug" hidden></div>';
   document.body.appendChild(ui);
   var border = document.getElementById('heyp-border'), caption = document.getElementById('heyp-caption'), pill = document.getElementById('heyp-pill'), pillText = document.getElementById('heyp-pill-text');
   var capQ = caption.querySelector('.heyp-q'), capA = caption.querySelector('.heyp-a');
+  var dbg = document.getElementById('heyp-debug'), DEBUG = /voicedebug/.test(location.hash + location.search);
+  if (DEBUG) { dbg.hidden = false; }
+  function log(msg) {
+    if (!DEBUG) { return; }
+    var line = document.createElement('div'); line.textContent = new Date().toTimeString().slice(0, 8) + '  ' + msg;
+    dbg.appendChild(line); while (dbg.children.length > 14) { dbg.removeChild(dbg.firstChild); }
+  }
 
   function setState(s) {
+    if (s !== state) { log('state -> ' + s); }
     state = s;
     document.documentElement.setAttribute('data-voice', s);
-    var text = { off: 'Enable voice: say "Hey Prashanth"', idle: 'Listening for "Hey Prashanth"', waking: 'Yes?', listening: 'Listening...', thinking: 'Thinking...', speaking: 'Speaking... say "Hey Prashanth" to interrupt' }[s];
+    var text = { off: 'Turn on voice: say "Hello"', idle: 'Listening for "Hello"', waking: 'Yes?', listening: 'Listening...', thinking: 'Thinking...', speaking: 'Speaking... say "Hello" to interrupt' }[s];
     pillText.textContent = text; pill.setAttribute('aria-pressed', String(s !== 'off'));
   }
   function showCaption(q, a) {
@@ -93,9 +110,12 @@
     r.onresult = function (e) {
       var finalText = '', interim = '';
       for (var i = e.resultIndex; i < e.results.length; i++) { (e.results[i].isFinal ? (finalText += ' ') : (interim += ' ')); (e.results[i].isFinal ? (finalText += e.results[i][0].transcript) : (interim += e.results[i][0].transcript)); }
+      if (finalText.trim()) { log('heard (final): ' + finalText.trim()); } else if (interim.trim()) { log('hearing: ' + interim.trim()); }
       handle(finalText.trim(), interim.trim());
     };
+    r.onstart = function () { log('recognizer started, state ' + state); };
     r.onerror = function (e) {
+      log('recognizer error: ' + e.error);
       if (e.error === 'not-allowed' || e.error === 'service-not-allowed') { recWanted = false; rec = null; setState('off'); pillText.textContent = 'Microphone blocked. Allow it in the address bar, then click here.'; return; }
       // 'no-speech', 'network', 'aborted' -> restart below via onend
     };
@@ -143,7 +163,9 @@
     clearTimeout(followTimer);
     setState('thinking'); showCaption(q, '');
     pauseRecWhileSpeaking();
+    log('question: ' + q);
     ask(q, true, true).then(function (text) {
+      log('answer: ' + text.slice(0, 80));
       showCaption(q, text); setState('speaking');
       return speak(text);
     }).then(function () {
@@ -159,8 +181,14 @@
     ask.then(function (stream) {
       if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); }   // permission is what we wanted; the recognizer opens its own
       try { localStorage.setItem(PREF_KEY, 'on'); } catch (e) {}
-      recWanted = true; setState('idle'); startRec();
-      if (fromClick) { chime(true); showCaption('', 'Say "Hey Prashanth" and ask me anything.'); hideCaptionSoon(5000); }
+      recWanted = true; setState('idle'); startRec(); pill.classList.remove('heyp-pill-invite');
+      if (fromClick) {
+        chime(true);
+        var hello = 'Voice is on. Say hello, then ask me anything.';
+        showCaption('', hello); hideCaptionSoon(6000);
+        pauseRecWhileSpeaking(); setState('speaking');
+        speak(hello).then(function () { setState('idle'); resumeRec(); });     // first utterance unlocks speech for the session
+      }
     }).catch(function () {
       setState('off');
       pillText.textContent = fromClick ? 'Microphone blocked. Allow it in the address bar, then click here.' : 'Enable voice: say "Hey Prashanth"';
@@ -174,5 +202,12 @@
   var stored = null;
   try { stored = localStorage.getItem(PREF_KEY); } catch (e) { stored = null; }
   setState('off');
-  if (stored !== 'off' && SR) { enable(false); }          // first visit and returning visitors: ask the browser right away
+  // Browsers block sound and speech until the visitor has clicked something, so the mode starts from a click.
+  // The pill does the asking; it is big and animated on the first visit so nobody misses it.
+  if (SR && stored !== 'off') { pill.classList.add('heyp-pill-invite'); }
+  // any first click anywhere also counts: if they already allowed the mic earlier, start listening on that click
+  document.addEventListener('pointerdown', function first() {
+    document.removeEventListener('pointerdown', first);
+    if (state === 'off' && SR && stored === 'on') { enable(false); }
+  }, true);
 })();

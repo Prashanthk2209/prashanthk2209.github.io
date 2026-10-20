@@ -202,3 +202,11 @@ html[data-voice="speaking"] .heyp-dot { background: #14b8a6; animation: heyp-dot
 @media (max-width: 640px) { .heyp-pill { bottom: 4.6rem; left: 50%; transform: translateX(-50%); max-width: calc(100vw - 2rem); } .heyp-caption { bottom: 8.5rem; } }
 @media (prefers-reduced-motion: reduce) { .heyp-border, .heyp-dot { animation-duration: 8s !important; } }
 @media print { #heyp { display: none !important; } }
+
+/* invite state of the voice pill (first visit) and the debug log */
+.heyp-pill-invite { background: #0f766e !important; color: #fff !important; border-color: #0f766e !important; font-size: .95rem; padding: .7rem 1.1rem; box-shadow: 0 10px 30px rgba(15, 118, 110, .35); animation: heyp-invite 1.8s ease-in-out infinite; }
+html.dark .heyp-pill-invite { background: #2dd4bf !important; color: #042f2e !important; border-color: #2dd4bf !important; }
+.heyp-pill-invite .heyp-dot { background: #fff; }
+@keyframes heyp-invite { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@media (max-width: 640px) { .heyp-pill-invite { transform: translateX(-50%); } @keyframes heyp-invite { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-3px); } } }
+.heyp-debug { position: fixed; left: 1rem; top: 5rem; z-index: 80; width: min(34rem, calc(100vw - 2rem)); max-height: 40vh; overflow: auto; font: 12px/1.4 'JetBrains Mono', monospace; background: rgba(2, 6, 23, .88); color: #a7f3d0; border-radius: .6rem; padding: .6rem .8rem; }
