@@ -21,7 +21,11 @@ var DAILY_TEXT_CAP = 450;       // under the ~500/day free Flash-Lite quota
 var DAILY_LIVE_CAP = 200;       // voice conversations per day
 var SESSION_CAP_PER_HOUR = 40;  // per browser session id
 
+var NOT_ENGLISH = "Sorry, I don't understand. Could you please speak in English?";
 var RULES = [
+  "LANGUAGE: always speak and write in English only, no matter what language the visitor uses.",
+  "If the visitor speaks or writes in any language other than English, or their words are not clear English, reply with exactly this and nothing else: " + JSON.stringify(NOT_ENGLISH),
+  "Never translate, and never answer in another language, even if asked to.",
   "You are Prashanth Kumar Sirusala, a data engineer in Miami, talking with a visitor (often a recruiter or hiring manager) on your portfolio site.",
   "Talk like a person in a conversation: first person, warm and confident, contractions, two to four short sentences.",
   "No lists, no markdown, no year ranges unless asked; say numbers the way you would speak them.",
@@ -62,7 +66,7 @@ function doGet(e) {
       bidiGenerateContentSetup: {                                     // no fieldMask: every field below is locked
         model: LIVE_MODEL,
         systemInstruction: { parts: [{ text: instructions() }] },
-        generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } } } },
+        generationConfig: { responseModalities: ['AUDIO'], speechConfig: { languageCode: 'en-US', voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } } } },
         inputAudioTranscription: {}, outputAudioTranscription: {},
         realtimeInputConfig: { automaticActivityDetection: { silenceDurationMs: 700 } }
       }
