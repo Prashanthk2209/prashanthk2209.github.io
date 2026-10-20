@@ -338,16 +338,17 @@
   }
   function close() {
     panel.hidden = true; openBtn.setAttribute('aria-expanded', 'false');
+    try { sessionStorage.setItem(CLOSED_KEY, '1'); } catch (e) {}           // closed by the visitor: do not pop up again this visit
     if (window.PORTFOLIO_LIVE && window.PORTFOLIO_LIVE.active()) { window.PORTFOLIO_LIVE.stop('closed'); }
     openBtn.focus();
   }
-  // Opens by itself the first time the visitor scrolls (once per visit; a closed panel stays closed).
-  var AUTO_KEY = 'talkAutoOpened';
+  // Opens by itself on the first scroll of every page load, unless the visitor closed it earlier in this visit.
+  var CLOSED_KEY = 'talkClosed';
   function firstScroll() {
     if (window.scrollY < 120) { return; }
     window.removeEventListener('scroll', firstScroll);
-    var seen = null; try { seen = sessionStorage.getItem(AUTO_KEY); sessionStorage.setItem(AUTO_KEY, '1'); } catch (e) {}
-    if (!seen && panel.hidden) { open(true); }
+    var closed = null; try { closed = sessionStorage.getItem(CLOSED_KEY); } catch (e) {}
+    if (!closed && panel.hidden) { open(true); }
   }
   window.addEventListener('scroll', firstScroll, { passive: true });
   openBtn.addEventListener('click', function () { panel.hidden ? open() : close(); });
