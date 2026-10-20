@@ -60,7 +60,7 @@
     '<div id="heyp-border" class="heyp-border" aria-hidden="true"></div>' +
     '<div id="heyp-caption" class="heyp-caption" aria-live="polite" hidden><div class="heyp-q"></div><div class="heyp-a"></div></div>' +
     '<button id="heyp-pill" type="button" class="heyp-pill" aria-pressed="false">' +
-      '<span class="heyp-dot" aria-hidden="true"></span><span id="heyp-pill-text">Turn on voice: say "Hello"</span></button>' +
+      '<span class="heyp-dot" aria-hidden="true"></span><span id="heyp-pill-text">Turn on voice: say "Hey Prashanth"</span></button>' +
     '<div id="heyp-debug" class="heyp-debug" hidden></div>';
   document.body.appendChild(ui);
   var border = document.getElementById('heyp-border'), caption = document.getElementById('heyp-caption'), pill = document.getElementById('heyp-pill'), pillText = document.getElementById('heyp-pill-text');
@@ -73,11 +73,12 @@
     dbg.appendChild(line); while (dbg.children.length > 14) { dbg.removeChild(dbg.firstChild); }
   }
 
+  var stateSince = Date.now();
   function setState(s) {
-    if (s !== state) { log('state -> ' + s); }
+    if (s !== state) { log('state -> ' + s); stateSince = Date.now(); }
     state = s;
     document.documentElement.setAttribute('data-voice', s);
-    var text = { off: 'Turn on voice: say "Hello"', idle: 'Listening for "Hello"', waking: 'Yes?', listening: 'Listening...', thinking: 'Thinking...', speaking: 'Speaking... say "Hello" to interrupt' }[s];
+    var text = { off: 'Turn on voice: say "Hey Prashanth"', idle: 'Listening for "Hey Prashanth" or "Hello"', waking: 'Yes?', listening: 'Listening...', thinking: 'Thinking...', speaking: 'Speaking... say "Hey Prashanth" to interrupt' }[s];
     pillText.textContent = text; pill.setAttribute('aria-pressed', String(s !== 'off'));
   }
   function showCaption(q, a) {
@@ -126,7 +127,12 @@
   function pauseRecWhileSpeaking() { if (rec) { try { rec.onend = null; rec.abort(); } catch (e) {} rec = null; } }
   function resumeRec() { if (recWanted && !rec) { startRec(); } }
 
-  var pendingQ = '';
+  var pendingQ = '', lastSpoken = '', speakEnd = 0;
+  function similarText(a, b) {
+    var wa = a.toLowerCase().split(/\W+/).filter(function (w) { return w.length > 3; }), set = {}; b.toLowerCase().split(/\W+/).forEach(function (w) { set[w] = 1; });
+    if (!wa.length) { return false; }
+    var hit = wa.filter(function (w) { return set[w]; }).length; return hit / wa.length > 0.6;
+  }
   function handle(finalText, interim) {
     var text = finalText || interim;
     if (!text) { return; }
@@ -142,15 +148,29 @@
       return;
     }
     if (state === 'waking' || state === 'listening') {
+      if (lastSpoken && finalText && similarText(finalText, lastSpoken)) { log('ignored echo of my own voice'); return; }
       setState('listening');
-      if (interim) { showCaption(interim, ''); lastInterim = interim; }
+      if (interim) { showCaption(interim, ''); lastInterim = interim; speculate(interim); }
       if (finalText) {
         var q = finalText;
         if (wakeIndex(q) >= 0) { q = afterWake(q) || ''; }
-        if (q.split(/\s+/).length < 2) { return; }        // a stray word; keep listening
+        if (Date.now() - speakEnd < 1500) { log('ignored fragment right after speaking'); return; }   // speaker echo tail
+        if (q.split(/\s+/).length < 3) { log('ignored short fragment: ' + q); return; }               // noise, not a question
         question(q);
       }
     }
+  }
+  // While the question is still being spoken, look up the answer to what has been heard so far and start synthesizing
+  // its opening words. When the final transcript lands, the audio is usually already there.
+  var specTimer = null, specText = '';
+  function speculate(partial) {
+    clearTimeout(specTimer);
+    specTimer = setTimeout(function () {
+      var q = wakeIndex(partial) >= 0 ? (afterWake(partial) || '') : partial;
+      if (q.split(/\s+/).length < 3 || !API.peek) { return; }
+      var a = API.peek(q);
+      if (a && a !== specText) { specText = a; API.prefetch(a, 1, 1); log('speculative: ' + a.slice(0, 50)); }
+    }, 250);
   }
   function wake() {
     clearTimeout(followTimer);
@@ -160,19 +180,24 @@
   }
   function sleep() { clearTimeout(followTimer); setState('idle'); hideCaptionSoon(1500); }
   function question(q) {
-    clearTimeout(followTimer);
+    clearTimeout(followTimer); clearTimeout(specTimer); specText = '';
     setState('thinking'); showCaption(q, '');
-    pauseRecWhileSpeaking();
     log('question: ' + q);
     ask(q, true, true).then(function (text) {
       log('answer: ' + text.slice(0, 80));
-      showCaption(q, text); setState('speaking');
-      return speak(text);
+      showCaption(q, text); setState('speaking'); lastSpoken = text;
+      return speak(text, { filler: true });          // the whole answer, synthesized in the background as it plays
     }).then(function () {
-      setState('listening'); resumeRec(); hideCaptionSoon(FOLLOW_MS);
+      speakEnd = Date.now(); setState('listening'); hideCaptionSoon(FOLLOW_MS);
       followTimer = setTimeout(function () { if (state === 'listening') { chime(false); sleep(); } }, FOLLOW_MS);
-    }).catch(function () { setState('listening'); resumeRec(); });
+    }).catch(function () { setState('listening'); });
   }
+  setInterval(function () {                                                   // watchdog: a stuck state returns to listening/idle
+    if (!recWanted) { return; }
+    if (!rec) { startRec(); }
+    if (state === 'thinking' && Date.now() - stateSince > 25000) { setState('listening'); }
+    if (state === 'speaking' && Date.now() - stateSince > 60000) { setState('listening'); }
+  }, 2000);
 
   /* ---------- enabling: ask for the mic when the page opens, remember the choice ---------- */
   function enable(fromClick) {
@@ -185,10 +210,11 @@
       if (API.warmVoice) { API.warmVoice(); }          // start downloading the natural voice now, not at the first answer
       if (fromClick) {
         chime(true);
-        var hello = 'Voice is on. Say hello, then ask me anything.';
+        var hello = "Voice is on. I'm listening.";                             // must not contain the wake word
         showCaption('', hello); hideCaptionSoon(6000);
-        pauseRecWhileSpeaking(); setState('speaking');
-        speak(hello).then(function () { setState('idle'); resumeRec(); });     // first utterance unlocks speech for the session
+        setState('speaking');
+        speak(hello).then(function () { if (state === 'speaking') { setState('idle'); } });
+        setTimeout(function () { if (state === 'speaking') { setState('idle'); } }, 6000);   // belt and braces: never stay deaf
       }
     }).catch(function () {
       setState('off');
@@ -199,7 +225,8 @@
   pill.addEventListener('click', function () { if (state === 'off') { enable(true); } else { disable(); } });
   document.addEventListener('visibilitychange', function () { if (document.hidden) { pauseRecWhileSpeaking(); } else { resumeRec(); } });
 
-  window.PORTFOLIO_VOICE_DEBUG = { wakeIndex: wakeIndex, afterWake: afterWake, setState: setState, showCaption: showCaption, state: function () { return state; } };
+  window.PORTFOLIO_VOICE_DEBUG = { wakeIndex: wakeIndex, afterWake: afterWake, setState: setState, showCaption: showCaption, state: function () { return state; },
+    feed: function (text, isFinal) { if (state === 'off') { recWanted = true; setState('idle'); } handle(isFinal ? text : '', isFinal ? '' : text); }, log: log };
   var stored = null;
   try { stored = localStorage.getItem(PREF_KEY); } catch (e) { stored = null; }
   setState('off');

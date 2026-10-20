@@ -53,7 +53,7 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {
+    if (window.tailwind) tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {

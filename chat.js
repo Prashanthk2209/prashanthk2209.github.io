@@ -165,8 +165,11 @@
         return open + joinProse(b, true) + ' Outside work I built JobHub, where parallel Claude browser agents fill application forms and a hiring-manager agent reviews each tailored resume. I also use Snowflake Cortex and the Claude and GPT APIs for data-quality and documentation work.' + (p ? '' : '');
       } },
     { rx: /\b(who are you|about you|introduce|yourself|what do you do|tell me about you)\b/i, topic: 'my background', run: function () {
-        var y = byKind('years')[0], hero = KB.filter(function (c) { return c.kind === 'bullet' && /17B|18 hours/.test(c.text); }).slice(0, 2);
-        return "I'm Prashanth, a data engineer in Miami. " + (y ? y.text : '') + ' Most recently, ' + lowerFirst(joinProse(hero, false));
+        // A spoken pitch, not a resume readout: who, what, three results, what sets him apart. Every fact is in kb.js.
+        return "I'm Prashanth, a data engineer in Miami with about five years of building data platforms on AWS and Snowflake. " +
+          'At Tech Detectives, I made a 17 billion row Snowflake workload 70 to 80 percent faster, and cut an 18 hour reporting refresh down to 2 hours. ' +
+          'I also put Claude into our pull request checks, so data-loss gaps get caught before release. ' +
+          "And with a master's in cybersecurity, security is built into how I design pipelines.";
       } },
     { rx: /\b(how (many|much) years|years of experience|how long|experience do you have|how experienced)\b/i, run: function () { return byKind('years')[0].text; } },
     { rx: /\b(email|phone|contact|reach you|linkedin|get in touch|hire you how|talk to you)\b/i, run: function () { return byKind('contact')[0].text; } },
@@ -188,8 +191,7 @@
       } },
     { rx: /\b(jobhub|side project|projects?|built for yourself)\b/i, topic: 'JobHub', run: function () { return byKind('project')[0].text; } },
     { rx: /\b(why (should we|hire)|strengths?|pitch|sell yourself|what makes you|stand out|best at|good at)\b/i, run: function () {
-        var hero = KB.filter(function (c) { return c.kind === 'bullet' && /17B|18 hours/.test(c.text); }).slice(0, 2);
-        return 'Three things. I ship measurable results: ' + lowerFirst(joinProse(hero, false)) + ' I bring security with me, with an M.S. in Cybersecurity, Security+ and the AWS Solutions Architect certification. And I use AI where it earns its place, from Claude-based checks in CI to the agents that run JobHub.';
+        return 'Three things. I ship measurable results: I made a 17 billion row Snowflake workload 70 to 80 percent faster, and cut an 18 hour reporting refresh to 2 hours. I bring security with me, with an M.S. in Cybersecurity, Security+ and the AWS Solutions Architect certification. And I use AI where it earns its place, from Claude-based checks in CI to the agents that run JobHub.';
       } },
     { rx: /\b(tech detectives|triangulum|mindtree)\b/i, run: function (q) {
         var name = /tech detectives/i.test(q) ? 'Tech Detectives' : /triangulum/i.test(q) ? 'Triangulum' : 'Mindtree';
@@ -368,12 +370,13 @@
       .replace(/\bLinkedIn\b/g, 'Linked-In')
       .replace(/786-561-6223/g, '7 8 6, 5 6 1, 6 2 2 3')
       .replace(/\bprashanthk2209\.github\.io\b/gi, 'prashanth k 22 09 dot github dot I O')
-      .replace(/(\d+)B-row/g, '$1 billion row').replace(/\b17B\b/g, '17 billion').replace(/\b450M\b/g, '450 million').replace(/\b1 TB\b/g, 'one terabyte')
+      .replace(/\bH-?1B\b/gi, 'H 1 B').replace(/\ban M\.S\./g, "a master's").replace(/(\d+)\s?B[\u2010-\u2015-]row/g, '$1 billion row').replace(/\b(\d+)B\b/g, '$1 billion').replace(/\b(\d+)M\b/g, '$1 million').replace(/\b1 TB\b/g, 'one terabyte').replace(/\b(\d+)\s?TB\b/g, '$1 terabytes')
       .replace(/(\d+)\s*[–-]\s*(\d+)%/g, '$1 to $2 percent').replace(/%/g, ' percent')
       .replace(/\bSQL\b/g, 'S Q L').replace(/\bSSIS\b/g, 'S S I S').replace(/\bdbt\b/g, 'd b t').replace(/\bMWAA\b/g, 'M W A A').replace(/\bETL\b/g, 'E T L').replace(/\bCDC\b/g, 'C D C')
       .replace(/\bRBAC\b/g, 'R back').replace(/\bIAM\b/g, 'I A M').replace(/\bKMS\b/g, 'K M S').replace(/\bSQS\b/g, 'S Q S').replace(/\bPHI\b/g, 'P H I').replace(/\bPII\b/g, 'P I I')
       .replace(/\bMCP\b/g, 'M C P').replace(/\bCI\b/g, 'C I').replace(/\bFIU\b/g, 'F I U').replace(/\bM\.S\./g, 'Masters').replace(/\bB\.Tech\b/g, 'B Tech').replace(/\bSAA\b/g, 'S A A')
       .replace(/\bS3\b/g, 'S 3').replace(/\bPySpark\b/g, 'Pie Spark').replace(/\bSnowPro\b/g, 'Snow Pro').replace(/\bJobHub\b/g, 'Job Hub')
+      .replace(/\s*\((?:19|20)\d\d to (?:(?:19|20)\d\d|present)\)/gi, '')          // dates are for reading, not listening
       .replace(/\s*:\s*/g, ': ').replace(/\s+/g, ' ');
   }
   var NEURAL = window.PORTFOLIO_TTS;
@@ -382,13 +385,28 @@
   if (NEURAL) { NEURAL.onStatus(function (msg) { status.textContent = msg || ''; }); }
   function neuralOk() { return !!(NEURAL && useNeural && NEURAL.supported() && !NEURAL.failed()); }
   function warmVoice() { return neuralOk() ? NEURAL.warm().catch(function () {}) : Promise.resolve(); }
-  function speak(text) {
+  function speak(text, opts) {
     stopSpeaking();
     if (neuralOk()) {
       if (!NEURAL.ready()) { NEURAL.warm().catch(function () {}); return browserSpeak(text); }   // first answers use the device voice while the natural one downloads
-      return NEURAL.speak(text).catch(function () { return browserSpeak(text); });
+      return NEURAL.speak(spoken(text), opts).catch(function () { return browserSpeak(text); });
     }
     return browserSpeak(text);
+  }
+  // Synthesize ahead of time so these answers start the instant they are asked. peek() answers without touching the
+  // conversation memory, so speculative lookups do not change what a follow-up question resolves to.
+  function peek(q) { return answerCore(resolve(String(q || '').trim())).text; }
+  function prefetch(text, pieces, prio) { if (neuralOk() && NEURAL.ready() && text) { NEURAL.prefetch(spoken(text), pieces, prio); } }
+  var LIKELY = SUGGEST.concat(['Tell me about yourself', 'How many years of experience do you have?', 'What is your current role?',
+    'Where are you located?', 'When can you start?', 'What kind of role are you looking for?', 'What certifications do you have?',
+    'What is your education?', 'What have you done with AWS?', 'Tell me about Redshift']);
+  if (NEURAL) {
+    NEURAL.onReady(function () {
+      // Opening words of every likely answer first (that is what removes the wait), then their second pieces.
+      var texts = LIKELY.map(peek).concat(SMALLTALK.map(function (s) { return s.text; }));
+      texts.forEach(function (t) { prefetch(t, 1, 2); });
+      texts.forEach(function (t) { prefetch(t, 2, 3); });
+    });
   }
   function browserSpeak(text) {
     if (!window.speechSynthesis) { return Promise.resolve(); }
@@ -396,12 +414,16 @@
       var u = new SpeechSynthesisUtterance(spoken(text).slice(0, 1000));
       var v = voice(); if (v) { u.voice = v; u.lang = v.lang; }
       u.rate = 1.0; u.pitch = 1.0; u.volume = 1.0;
-      var done = false; function fin() { if (!done) { done = true; resolve(); } }
+      var done = false; function fin() { if (!done) { done = true; clearInterval(poll); resolve(); } }
       u.onend = fin; u.onerror = fin;
-      window.speechSynthesis.speak(u);
-      // Chrome stops long utterances after ~15 s unless nudged; resume keeps it talking
-      var keep = setInterval(function () { if (done) { clearInterval(keep); return; } if (window.speechSynthesis.paused) { window.speechSynthesis.resume(); } }, 5000);
-      setTimeout(fin, 90000);
+      var started = false, poll = setInterval(function () {
+        var ss = window.speechSynthesis;
+        if (ss.speaking) { started = true; if (ss.paused) { ss.resume(); } }        // Chrome pauses long utterances; keep it going
+        else if (started) { fin(); }                                              // onend did not fire: Chrome bug, poll caught it
+      }, 200);
+      setTimeout(function () { window.speechSynthesis.speak(u); }, 60);            // a short gap after cancel(), or Chrome drops the utterance
+      setTimeout(function () { if (!started) { fin(); } }, 4000);                   // never started: give up quietly
+      setTimeout(fin, Math.min(60000, 4000 + u.text.length * 90));                  // hard cap scaled to the text
     }); });
   }
   if (window.speechSynthesis && typeof window.speechSynthesis.getVoices === 'function') { window.speechSynthesis.getVoices(); }
@@ -450,7 +472,7 @@
     }
     return remoteAnswer(q, local).then(show).catch(function () { return show(local.text); });
   }
-  window.PORTFOLIO_CHAT_API = { answer: answer, ask: ask, speak: speak, warmVoice: warmVoice, voices: allVoices, voice: voice, spoken: function (t) { return spoken(t); }, stopSpeaking: stopSpeaking, open: open, close: close, isOpen: function () { return !panel.hidden; } };
+  window.PORTFOLIO_CHAT_API = { answer: answer, ask: ask, speak: speak, peek: peek, prefetch: prefetch, warmVoice: warmVoice, voices: allVoices, voice: voice, spoken: function (t) { return spoken(t); }, stopSpeaking: stopSpeaking, open: open, close: close, isOpen: function () { return !panel.hidden; } };
   form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value, false); });
 
   /* ---------- voice in: Whisper in the browser, browser recognizer as fallback; tap to start, tap to stop ---------- */
