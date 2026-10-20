@@ -351,7 +351,9 @@ window.PORTFOLIO = {
     ],
     certifications: [
       { name: "AWS Certified Solutions Architect - Associate", issuer: "Amazon Web Services", icon: "cloud" },
-      { name: "CompTIA Security+", issuer: "CompTIA", icon: "shield-check" }
+      { name: "CompTIA Security+", issuer: "CompTIA", icon: "shield-check" },
+      { name: "SnowPro Core (in progress)", issuer: "Snowflake", icon: "snowflake" },
+      { name: "AWS Certified Data Engineer - Associate (in progress)", issuer: "Amazon Web Services", icon: "database" }
     ]
   },
 

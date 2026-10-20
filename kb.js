@@ -250,7 +250,7 @@ window.PORTFOLIO_KB = [
   "section": "certifications",
   "role": "",
   "kind": "certs",
-  "text": "Certifications: AWS Certified Solutions Architect – Associate and CompTIA Security+."
+  "text": "Certifications: AWS Certified Solutions Architect – Associate and CompTIA Security+ and SnowPro Core (in progress) and AWS Certified Data Engineer – Associate (in progress)."
  },
  {
   "id": 37,

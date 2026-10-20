@@ -164,7 +164,11 @@
     { rx: /\b(where (are you )?(located|based|living)|where do you live|current(ly)? (locat|based|liv)|which city|what city|where in the (us|states|country))/i, run: function () { return "I'm based in Miami, Florida. I work remote or hybrid and I'm open to relocation for the right role."; } },
     { rx: /\b(remote|hybrid|onsite|on-site|relocat\w*|work from home)\b/i, run: function () { return byKind('availability')[0].text; } },
     { rx: /\b(looking for|open to|what roles|kind of role|next role|ideal role|what are you after)\b/i, run: function () { return byKind('goals')[0].text; } },
-    { rx: /certif|security\+|solutions architect/i, topic: 'my certifications', run: function () { return 'Two: ' + byKind('certs')[0].text.replace(/^Certifications: /, '').replace(/\.$/, '') + '. The security one is not decoration; it is how I approach pipeline design.'; } },
+    { rx: /certif|security\+|solutions architect/i, topic: 'my certifications', run: function () {
+        var all = byKind('certs')[0].text.replace(/^Certifications: /, '').replace(/\.$/, '').split(/ and |, /);
+        var held = all.filter(function (c) { return !/in progress/i.test(c); }), prog = all.filter(function (c) { return /in progress/i.test(c); }).map(function (c) { return c.replace(/\s*\(in progress\)/i, ''); });
+        return 'I hold ' + held.join(' and ') + '. The security one is not decoration; it is how I approach pipeline design.' + (prog.length ? ' I am currently working toward ' + prog.join(' and ') + '.' : '');
+      } },
     { rx: /\b(education|degree|university|college|school|master|bachelor|study|studied)\b/i, topic: 'my education', run: function () {
         var e = byKind('education'); return 'I have ' + e.map(function (c) { return c.text.replace(/\.$/, ''); }).join(', and before that ') + '. The master\'s is why security shows up in how I design pipelines.';
       } },
@@ -245,7 +249,7 @@
     var top = dedupe(hits.filter(function (h) { return h.s >= hits[0].s * 0.45; }).map(function (h) { return h.c; })).slice(0, 3);
     return { text: (YESNO.test(q) ? 'Yes. ' : '') + joinProse(top, true), refs: [] };
   }
-  window.PORTFOLIO_CHAT_DEBUG = { tokens: tokens, DF: DF, search: search, answer: answer, memory: memory };
+  window.PORTFOLIO_CHAT_DEBUG = { tokens: tokens, DF: DF, search: search, answer: answer, memory: memory, spoken: function (t) { return spoken(t); } };
 
   /* ---------- optional worker ---------- */
   function remoteAnswer(q, local) {
@@ -309,16 +313,34 @@
   var speakOn = false, lastVoiceQuestion = false;
   function voice() {
     var vs = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-    var pref = ['Google US English', 'Samantha', 'Alex', 'Daniel', 'Microsoft David', 'Microsoft Mark'];
-    for (var i = 0; i < pref.length; i++) { var v = vs.filter(function (x) { return x.name.indexOf(pref[i]) === 0; })[0]; if (v) { return v; } }
-    return vs.filter(function (x) { return /^en[-_]US/i.test(x.lang); })[0] || vs.filter(function (x) { return /^en/i.test(x.lang); })[0] || null;
+    // Male English voices first (the names differ per OS and browser), then any male-sounding English voice.
+    var pref = ['Google UK English Male', 'Microsoft Guy Online', 'Microsoft Guy', 'Microsoft Ryan Online', 'Microsoft David', 'Microsoft Mark', 'Daniel', 'Alex', 'Aaron', 'Arthur', 'Rishi', 'Fred', 'Tom', 'Oliver', 'Reed', 'Rocko', 'Eddy', 'Evan', 'James', 'Gordon', 'Lee'];
+    for (var i = 0; i < pref.length; i++) { var v = vs.filter(function (x) { return /^en/i.test(x.lang) && x.name.indexOf(pref[i]) === 0; })[0]; if (v) { return v; } }
+    var male = vs.filter(function (x) { return /^en/i.test(x.lang) && /male|\b(david|mark|guy|daniel|alex|aaron|arthur|rishi|fred|tom|oliver|james|ryan|brian|george|matthew|liam|noah)\b/i.test(x.name) && !/female/i.test(x.name); })[0];
+    return male || vs.filter(function (x) { return /^en[-_]US/i.test(x.lang); })[0] || vs.filter(function (x) { return /^en/i.test(x.lang); })[0] || null;
+  }
+  function spoken(t) {
+    // What the voice says. The screen keeps the written form; this is only for the ear.
+    return t
+      .replace(/prashanthsirusala2209@gmail\.com/gi, 'prashanth sirusala 22 09 at gmail dot com')
+      .replace(/linkedin\.com\/in\/psirusala/gi, 'linked-in dot com slash in slash P sirusala, spelled P, S, I, R, U, S, A, L, A')
+      .replace(/\bLinkedIn\b/g, 'Linked-In')
+      .replace(/786-561-6223/g, '7 8 6, 5 6 1, 6 2 2 3')
+      .replace(/\bprashanthk2209\.github\.io\b/gi, 'prashanth k 22 09 dot github dot I O')
+      .replace(/(\d+)B-row/g, '$1 billion row').replace(/\b17B\b/g, '17 billion').replace(/\b450M\b/g, '450 million').replace(/\b1 TB\b/g, 'one terabyte')
+      .replace(/(\d+)\s*[–-]\s*(\d+)%/g, '$1 to $2 percent').replace(/%/g, ' percent')
+      .replace(/\bSQL\b/g, 'S Q L').replace(/\bSSIS\b/g, 'S S I S').replace(/\bdbt\b/g, 'd b t').replace(/\bMWAA\b/g, 'M W A A').replace(/\bETL\b/g, 'E T L').replace(/\bCDC\b/g, 'C D C')
+      .replace(/\bRBAC\b/g, 'R back').replace(/\bIAM\b/g, 'I A M').replace(/\bKMS\b/g, 'K M S').replace(/\bSQS\b/g, 'S Q S').replace(/\bPHI\b/g, 'P H I').replace(/\bPII\b/g, 'P I I')
+      .replace(/\bMCP\b/g, 'M C P').replace(/\bCI\b/g, 'C I').replace(/\bFIU\b/g, 'F I U').replace(/\bM\.S\./g, 'Masters').replace(/\bB\.Tech\b/g, 'B Tech').replace(/\bSAA\b/g, 'S A A')
+      .replace(/\bS3\b/g, 'S 3').replace(/\bPySpark\b/g, 'Pie Spark').replace(/\bSnowPro\b/g, 'Snow Pro').replace(/\bJobHub\b/g, 'Job Hub')
+      .replace(/\s*:\s*/g, ': ').replace(/\s+/g, ' ');
   }
   function speak(text) {
     if (!window.speechSynthesis) { return; }
     stopSpeaking();
-    var u = new SpeechSynthesisUtterance(text.replace(/\s+/g, ' ').slice(0, 900));
+    var u = new SpeechSynthesisUtterance(spoken(text).slice(0, 1000));
     var v = voice(); if (v) { u.voice = v; }
-    u.rate = 1.02; u.pitch = 1;
+    u.rate = 1.0; u.pitch = 0.95;
     window.speechSynthesis.speak(u);
   }
   function stopSpeaking() { if (window.speechSynthesis && window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); } }
