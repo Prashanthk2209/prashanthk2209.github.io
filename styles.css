@@ -177,8 +177,6 @@ html.dark .hero-photo { border-color: #0f172a; box-shadow: 0 10px 30px rgba(0, 0
 @media (max-width: 1023px) { .hero-photo { width: 8.5rem; height: 8.5rem; } }
 
 
-.askme-voice { max-width: 9.5rem; font-size: .78rem; border: 1px solid #e2e8f0; border-radius: .6rem; padding: .35rem .5rem; background: #fff; color: #334155; }
-html.dark .askme-voice { background: #0f172a; border-color: #334155; color: #e2e8f0; }
 
 /* "Voice chat" button in the Talk to me panel (live.js) */
 .askme-voicebtn { display: inline-flex; align-items: center; gap: .4rem; height: 2.5rem; padding: 0 .75rem; border-radius: .625rem; border: 1px solid #0f766e; color: #0f766e; background: #f0fdfa; font-size: .85rem; font-weight: 600; white-space: nowrap; }

@@ -3,7 +3,6 @@
    conversation with Gemini (live.js), transcribed into the same log.
    Knowledge: window.PORTFOLIO_KB (kb.js, generated from the master resume and story). Nothing else.
    Answers are composed in the browser as first-person sentences from the matching passages (no server, no keys).
-   Read aloud (speaker toggle): Kokoro in the browser (tts.js), the browser's own voice while it downloads.
    window.PORTFOLIO_CHAT.endpoint is the Apps Script relay (chat-relay/) that hands out the Gemini Live passes. */
 (function () {
   'use strict';
@@ -264,7 +263,7 @@
     var top = dedupe(hits.filter(function (h) { return h.s >= hits[0].s * 0.45; }).map(function (h) { return h.c; })).slice(0, 3);
     return { text: (YESNO.test(q) ? 'Yes. ' : '') + joinProse(top, true), refs: [] };
   }
-  window.PORTFOLIO_CHAT_DEBUG = { tokens: tokens, DF: DF, search: search, answer: answer, memory: memory, spoken: function (t) { return spoken(t); } };
+  window.PORTFOLIO_CHAT_DEBUG = { tokens: tokens, DF: DF, search: search, answer: answer, memory: memory };
 
   /* ---------- optional worker ---------- */
   var turns = [];
@@ -300,7 +299,6 @@
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   var SUGGEST = ['What have you done with Snowflake?', 'Are you familiar with LLMs and AI models?', 'Why should we hire you?', 'What is JobHub?', 'How can I reach you?'];
   var MIC_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>';
-  var SPK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>';
   var root = document.createElement('div');
   root.id = 'askme';
   root.innerHTML =
@@ -309,8 +307,6 @@
       '<span>Talk to me</span></button>' +
     '<section id="askme-panel" class="askme-panel card" role="dialog" aria-modal="false" aria-labelledby="askme-title" hidden>' +
       '<header class="askme-head"><h2 id="askme-title">Talk to Prashanth</h2><div class="askme-tools">' +
-        '<label class="sr-only" for="askme-voice">Voice</label><select id="askme-voice" class="askme-voice" title="Voice" hidden></select>' +
-        '<button id="askme-speak" type="button" class="icon-btn" aria-label="Read answers aloud" aria-pressed="false" title="Read answers aloud">' + SPK_SVG + '</button>' +
         '<button id="askme-close" type="button" class="icon-btn" aria-label="Close">&#x2715;</button></div></header>' +
       '<div id="askme-log" class="askme-log" aria-live="polite" aria-relevant="additions"></div>' +
       '<div id="askme-suggest" class="askme-suggest" aria-label="Example questions"></div>' +
@@ -325,7 +321,7 @@
   document.body.appendChild(root);
   var openBtn = document.getElementById('askme-open'), panel = document.getElementById('askme-panel'), closeBtn = document.getElementById('askme-close');
   var log = document.getElementById('askme-log'), form = document.getElementById('askme-form'), input = document.getElementById('askme-input');
-  var mic = document.getElementById('askme-mic'), status = document.getElementById('askme-status'), suggest = document.getElementById('askme-suggest'), speakBtn = document.getElementById('askme-speak');
+  var mic = document.getElementById('askme-mic'), status = document.getElementById('askme-status'), suggest = document.getElementById('askme-suggest');
 
   function add(role, html) {
     var el = document.createElement('div'); el.className = 'askme-msg askme-' + role; el.innerHTML = html;
@@ -341,7 +337,7 @@
     if (!auto) { setTimeout(function () { input.focus(); }, 50); }        // opened by itself: do not pop up a phone keyboard
   }
   function close() {
-    panel.hidden = true; openBtn.setAttribute('aria-expanded', 'false'); stopSpeaking();
+    panel.hidden = true; openBtn.setAttribute('aria-expanded', 'false');
     if (window.PORTFOLIO_LIVE && window.PORTFOLIO_LIVE.active()) { window.PORTFOLIO_LIVE.stop('closed'); }
     openBtn.focus();
   }
@@ -361,158 +357,24 @@
   if (location.hash === '#ask') { open(); }
   document.querySelectorAll('a[href="#ask"]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); open(); }); });
 
-  /* ---------- voice out ---------- */
-  var speakOn = false, lastVoiceQuestion = false;
-  var VOICE_KEY = 'voiceName', chosenVoice = null;
-  try { chosenVoice = localStorage.getItem(VOICE_KEY); } catch (e) { chosenVoice = null; }
-  var NOVELTY = /fred|tom\b|rocko|eddy|reed|evan|gordon|flo\b|grandpa|grandma|sandy|shelley|junior|ralph|albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|kathy|princess|hysterical|ralph|junior/i;
-  function allVoices() {
-    var vs = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-    return vs.filter(function (v) { return /^en/i.test(v.lang) && !NOVELTY.test(v.name); });
-  }
-  function rank(v) {
-    // higher is better: natural/online voices, then Google, then the good system voices; male names first
-    var n = v.name, s = 0;
-    if (/natural/i.test(n)) { s += 50; }
-    if (/online/i.test(n)) { s += 20; }
-    if (/^Google/.test(n)) { s += 30; }
-    if (/premium|enhanced/i.test(n)) { s += 25; }
-    if (/male/i.test(n) && !/female/i.test(n)) { s += 15; }
-    if (/\b(guy|ryan|andrew|brian|christopher|eric|roger|steffan|david|mark|daniel|alex|aaron|arthur|rishi|oliver|james|george|matthew|liam|noah|thomas)\b/i.test(n)) { s += 12; }
-    if (/female|zira|aria|jenny|michelle|ana|emma|ava|samantha|karen|moira|tessa|fiona|victoria|susan|allison|kate|serena|libby|sonia|natasha|hazel/i.test(n)) { s -= 30; }
-    if (/^en[-_](US|GB)/i.test(v.lang)) { s += 5; }
-    if (/en[-_]IN/i.test(v.lang)) { s += 3; }
-    return s;
-  }
-  function voice() {
-    var vs = allVoices();
-    if (!vs.length) { return null; }
-    if (chosenVoice) { var pick = vs.filter(function (v) { return v.name === chosenVoice; })[0]; if (pick) { return pick; } }
-    vs.sort(function (a, b) { return rank(b) - rank(a); });
-    return vs[0];
-  }
-  function voicesReady() {
-    if (!window.speechSynthesis) { return Promise.resolve(); }
-    if (window.speechSynthesis.getVoices().length) { return Promise.resolve(); }
-    return new Promise(function (resolve) {
-      var done = false; function fin() { if (!done) { done = true; resolve(); } }
-      window.speechSynthesis.onvoiceschanged = fin; setTimeout(fin, 1500);
-    });
-  }
-  function spoken(t) {
-    // What the voice says. The screen keeps the written form; this is only for the ear.
-    return t
-      .replace(/prashanthsirusala2209@gmail\.com/gi, 'prashanth sirusala 22 09 at gmail dot com')
-      .replace(/linkedin\.com\/in\/psirusala/gi, 'linked-in dot com slash in slash P sirusala, spelled P, S, I, R, U, S, A, L, A')
-      .replace(/\bLinkedIn\b/g, 'Linked-In')
-      .replace(/786-561-6223/g, '7 8 6, 5 6 1, 6 2 2 3')
-      .replace(/\bprashanthk2209\.github\.io\b/gi, 'prashanth k 22 09 dot github dot I O')
-      .replace(/\bH-?1B\b/gi, 'H 1 B').replace(/\ban M\.S\./g, "a master's").replace(/(\d+)\s?B[\u2010-\u2015-]row/g, '$1 billion row').replace(/\b(\d+)B\b/g, '$1 billion').replace(/\b(\d+)M\b/g, '$1 million').replace(/\b1 TB\b/g, 'one terabyte').replace(/\b(\d+)\s?TB\b/g, '$1 terabytes')
-      .replace(/(\d+)\s*[–-]\s*(\d+)%/g, '$1 to $2 percent').replace(/%/g, ' percent')
-      .replace(/\bSQL\b/g, 'S Q L').replace(/\bSSIS\b/g, 'S S I S').replace(/\bdbt\b/g, 'd b t').replace(/\bMWAA\b/g, 'M W A A').replace(/\bETL\b/g, 'E T L').replace(/\bCDC\b/g, 'C D C')
-      .replace(/\bRBAC\b/g, 'R back').replace(/\bIAM\b/g, 'I A M').replace(/\bKMS\b/g, 'K M S').replace(/\bSQS\b/g, 'S Q S').replace(/\bPHI\b/g, 'P H I').replace(/\bPII\b/g, 'P I I')
-      .replace(/\bMCP\b/g, 'M C P').replace(/\bCI\b/g, 'C I').replace(/\bFIU\b/g, 'F I U').replace(/\bM\.S\./g, 'Masters').replace(/\bB\.Tech\b/g, 'B Tech').replace(/\bSAA\b/g, 'S A A')
-      .replace(/\bS3\b/g, 'S 3').replace(/\bPySpark\b/g, 'Pie Spark').replace(/\bSnowPro\b/g, 'Snow Pro').replace(/\bJobHub\b/g, 'Job Hub')
-      .replace(/\s*\((?:19|20)\d\d to (?:(?:19|20)\d\d|present)\)/gi, '')          // dates are for reading, not listening
-      .replace(/\s*:\s*/g, ': ').replace(/\s+/g, ' ');
-  }
-  var NEURAL = window.PORTFOLIO_TTS;
-  var useNeural = true;
-  try { useNeural = localStorage.getItem('voiceEngine') !== 'browser'; } catch (e) {}
-  if (NEURAL) { NEURAL.onStatus(function (msg) { status.textContent = msg || ''; }); }
-  function neuralOk() { return !!(NEURAL && useNeural && NEURAL.supported() && !NEURAL.failed()); }
-  function warmVoice() { return neuralOk() ? NEURAL.warm().catch(function () {}) : Promise.resolve(); }
-  function speak(text, opts) {
-    if (window.speechSynthesis && window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); }   // NEURAL.speak stops its own audio but lets a filler finish
-    if (neuralOk()) {
-      if (!NEURAL.ready()) { NEURAL.warm().catch(function () {}); return browserSpeak(text); }   // first answers use the device voice while the natural one downloads
-      return NEURAL.speak(spoken(text), opts).catch(function () { return browserSpeak(text); });
-    }
-    return browserSpeak(text);
-  }
-  // Synthesize ahead of time so these answers start the instant they are asked. peek() answers without touching the
-  // conversation memory, so speculative lookups do not change what a follow-up question resolves to.
-  function peek(q) { return answerCore(resolve(String(q || '').trim())).text; }
-  function prefetch(text, pieces, prio) { if (neuralOk() && NEURAL.ready() && text) { NEURAL.prefetch(spoken(text), pieces, prio); } }
-  var LIKELY = SUGGEST.concat(['Tell me about yourself', 'How many years of experience do you have?', 'What is your current role?',
-    'Where are you located?', 'When can you start?', 'What kind of role are you looking for?', 'What certifications do you have?',
-    'What is your education?', 'What have you done with AWS?', 'Tell me about Redshift']);
-  if (NEURAL) {
-    NEURAL.onReady(function () {
-      // Opening words of every likely answer first (that is what removes the wait), then their second pieces.
-      var texts = LIKELY.map(peek).concat(SMALLTALK.map(function (s) { return s.text; }));
-      texts.forEach(function (t) { prefetch(t, 1, 2); });
-      texts.forEach(function (t) { prefetch(t, 2, 3); });
-    });
-  }
-  function browserSpeak(text) {
-    if (!window.speechSynthesis) { return Promise.resolve(); }
-    return voicesReady().then(function () { return new Promise(function (resolve) {
-      var u = new SpeechSynthesisUtterance(spoken(text).slice(0, 1000));
-      var v = voice(); if (v) { u.voice = v; u.lang = v.lang; }
-      u.rate = 1.0; u.pitch = 1.0; u.volume = 1.0;
-      var done = false; function fin() { if (!done) { done = true; clearInterval(poll); resolve(); } }
-      u.onend = fin; u.onerror = fin;
-      var started = false, poll = setInterval(function () {
-        var ss = window.speechSynthesis;
-        if (ss.speaking) { started = true; if (ss.paused) { ss.resume(); } }        // Chrome pauses long utterances; keep it going
-        else if (started) { fin(); }                                              // onend did not fire: Chrome bug, poll caught it
-      }, 200);
-      setTimeout(function () { window.speechSynthesis.speak(u); }, 60);            // a short gap after cancel(), or Chrome drops the utterance
-      setTimeout(function () { if (!started) { fin(); } }, 4000);                   // never started: give up quietly
-      setTimeout(fin, Math.min(60000, 4000 + u.text.length * 90));                  // hard cap scaled to the text
-    }); });
-  }
-  if (window.speechSynthesis && typeof window.speechSynthesis.getVoices === 'function') { window.speechSynthesis.getVoices(); }
-  /* voice picker: every English voice on this device, best guess preselected, choice remembered */
-  function fillVoicePicker() {
-    var sel = document.getElementById('askme-voice'); if (!sel) { return; }
-    var html = '';
-    if (NEURAL && NEURAL.supported()) {
-      html += '<optgroup label="Natural voice (on this device)">' + NEURAL.voices().map(function (v) {
-        return '<option value="neural:' + v.id + '"' + (useNeural && v.id === NEURAL.voiceName() ? ' selected' : '') + '>' + esc(v.label) + '</option>'; }).join('') + '</optgroup>';
-    }
-    var vs = allVoices().sort(function (a, b) { return rank(b) - rank(a); }), best = voice();
-    if (vs.length) {
-      html += '<optgroup label="Browser voices">' + vs.map(function (v) { return '<option value="browser:' + esc(v.name) + '"' + (!useNeural && best && v.name === best.name ? ' selected' : '') + '>' + esc(v.name.replace(/Microsoft |Google |Online|\(Natural\)/g, '').trim()) + ' (' + esc(v.lang) + ')</option>'; }).join('') + '</optgroup>';
-    }
-    if (!html) { sel.hidden = true; return; }
-    sel.innerHTML = html; sel.hidden = false;
-  }
-  voicesReady().then(fillVoicePicker);
-  if (window.speechSynthesis) { var prev = window.speechSynthesis.onvoiceschanged; window.speechSynthesis.onvoiceschanged = function () { if (prev) { prev(); } fillVoicePicker(); }; }
-  function filler() { return neuralOk() && NEURAL.ready() && NEURAL.filler(); }
-  function stopSpeaking() { if (NEURAL) { NEURAL.stop(); } if (window.speechSynthesis && window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); } }
-  if (!window.speechSynthesis) { speakBtn.hidden = true; }
-  var voiceSel = document.getElementById('askme-voice');
-  voiceSel.addEventListener('change', function () {
-    var val = voiceSel.value || '';
-    if (val.indexOf('neural:') === 0) { useNeural = true; NEURAL.setVoice(val.slice(7)); try { localStorage.setItem('voiceEngine', 'neural'); } catch (e) {} }
-    else { useNeural = false; chosenVoice = val.slice(8); try { localStorage.setItem(VOICE_KEY, chosenVoice); localStorage.setItem('voiceEngine', 'browser'); } catch (e) {} }
-    speak('This is how I sound now. Ask me anything about my work.');
-  });
-  speakBtn.addEventListener('click', function () { speakOn = !speakOn; speakBtn.setAttribute('aria-pressed', String(speakOn)); if (!speakOn) { stopSpeaking(); } status.textContent = speakOn ? 'I will read my answers aloud.' : ''; setTimeout(function () { if (!speakOn) { status.textContent = ''; } }, 1500); });
-
-  function ask(q, spokenQ, silent) {
+  function ask(q) {
     q = String(q || '').trim(); if (!q) { return Promise.resolve(''); }
     suggest.innerHTML = '';
     greet();
     add('user', '<p>' + esc(q) + '</p>');
     input.value = '';
-    lastVoiceQuestion = !!spokenQ;
     var local = answer(q), way = route(q);
     var el = add('bot', '<p class="askme-thinking">...</p>');
     function show(text) {
       turns.push({ role: 'user', text: q }, { role: 'bot', text: text });
       el.innerHTML = '<p>' + esc(text) + '</p>';
       log.scrollTop = log.scrollHeight;
-      if (!silent && (speakOn || lastVoiceQuestion)) { speak(text); }
       return text;
     }
     if (way === 'reject') { return Promise.resolve(show(REJECT)); }
     return Promise.resolve(show(local.text));          // typed chat is static: built-in answers only, no quota
   }
-  window.PORTFOLIO_CHAT_API = { answer: answer, ask: ask, speak: speak, peek: peek, prefetch: prefetch, warmVoice: warmVoice, warmRelay: warmRelay, route: route, filler: filler, voices: allVoices, voice: voice, spoken: function (t) { return spoken(t); }, stopSpeaking: stopSpeaking, open: open, close: close, isOpen: function () { return !panel.hidden; } };
+  window.PORTFOLIO_CHAT_API = { answer: answer, ask: ask, warmRelay: warmRelay, route: route, open: open, close: close, isOpen: function () { return !panel.hidden; } };
   form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value, false); });
 
   /* ---------- voice chat: a live conversation with Gemini (live.js), transcribed into the log ---------- */
@@ -530,7 +392,7 @@
     var L = window.PORTFOLIO_LIVE;
     if (liveState !== 'off') { if (L) { L.stop('ended'); } return; }
     if (!L || !L.supported()) { status.textContent = 'Voice chat needs a recent Chrome, Edge or Safari. Typing works everywhere.'; return; }
-    stopSpeaking(); greet(); suggest.innerHTML = '';
+    greet(); suggest.innerHTML = '';
     liveState = 'connecting'; liveUI(); status.textContent = 'Connecting... allow the microphone if your browser asks.';
     L.prefetch().then(function (p) {
       if (!p) { throw new Error('busy'); }
