@@ -80,3 +80,11 @@ automated requests, which is its bot response, not a broken link); no `<img>` wi
   two passages per reply, yes/no questions open with "Yes." or an honest "I know X but no project was built around it".
   Voice in is tap-to-start / tap-to-stop (15 s auto-stop); voice out uses speechSynthesis, automatic after a spoken
   question and switchable in the header.
+- 2026-10-19 (hands-free): `voice.js` adds the "Hey Prashanth" mode. The page asks for the microphone on open (stored
+  choice in localStorage `voiceMode`; the pill at bottom-left toggles it). Idle listening uses the browser's continuous
+  SpeechRecognition (Chrome, Edge, Safari; the only thing a browser can run all day for free). Wake phrase matching is
+  tolerant (Levenshtein <= 3 to "prashanth", plus the recognizer's usual mishearings such as "percent"/"present").
+  On wake: synthesized two-tone chime, animated conic-gradient viewport border (`html[data-voice]` states waking /
+  listening / thinking / speaking), live captions (question right, answer left), the answer through chat.js (same
+  knowledge, same male voice), then 14 s of follow-up listening before a down-chime and sleep. Recognition is paused
+  while speaking so the page never answers itself. Whisper stays behind the mic button in the chat panel.

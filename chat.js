@@ -336,32 +336,41 @@
       .replace(/\s*:\s*/g, ': ').replace(/\s+/g, ' ');
   }
   function speak(text) {
-    if (!window.speechSynthesis) { return; }
+    if (!window.speechSynthesis) { return Promise.resolve(); }
     stopSpeaking();
-    var u = new SpeechSynthesisUtterance(spoken(text).slice(0, 1000));
-    var v = voice(); if (v) { u.voice = v; }
-    u.rate = 1.0; u.pitch = 0.95;
-    window.speechSynthesis.speak(u);
+    return new Promise(function (resolve) {
+      var u = new SpeechSynthesisUtterance(spoken(text).slice(0, 1000));
+      var v = voice(); if (v) { u.voice = v; }
+      u.rate = 1.0; u.pitch = 0.95;
+      var done = false; function fin() { if (!done) { done = true; resolve(); } }
+      u.onend = fin; u.onerror = fin;
+      window.speechSynthesis.speak(u);
+      setTimeout(fin, 60000);
+    });
   }
+  if (window.speechSynthesis && typeof window.speechSynthesis.getVoices === 'function') { window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged = function () {}; }
   function stopSpeaking() { if (window.speechSynthesis && window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); } }
   if (!window.speechSynthesis) { speakBtn.hidden = true; }
   speakBtn.addEventListener('click', function () { speakOn = !speakOn; speakBtn.setAttribute('aria-pressed', String(speakOn)); if (!speakOn) { stopSpeaking(); } status.textContent = speakOn ? 'I will read my answers aloud.' : ''; setTimeout(function () { if (!speakOn) { status.textContent = ''; } }, 1500); });
 
-  function ask(q, spoken) {
-    q = String(q || '').trim(); if (!q) { return; }
+  function ask(q, spokenQ, silent) {
+    q = String(q || '').trim(); if (!q) { return Promise.resolve(''); }
     suggest.innerHTML = '';
+    greet();
     add('user', '<p>' + esc(q) + '</p>');
     input.value = '';
-    lastVoiceQuestion = !!spoken;
+    lastVoiceQuestion = !!spokenQ;
     var local = answer(q);
     var el = add('bot', '<p class="askme-thinking">...</p>');
     function show(text) {
       el.innerHTML = '<p>' + esc(text) + '</p>';
       log.scrollTop = log.scrollHeight;
-      if (speakOn || lastVoiceQuestion) { speak(text); }
+      if (!silent && (speakOn || lastVoiceQuestion)) { speak(text); }
+      return text;
     }
-    remoteAnswer(q, local).then(show).catch(function () { show(local.text); });
+    return remoteAnswer(q, local).then(show).catch(function () { return show(local.text); });
   }
+  window.PORTFOLIO_CHAT_API = { answer: answer, ask: ask, speak: speak, spoken: function (t) { return spoken(t); }, stopSpeaking: stopSpeaking, open: open, close: close, isOpen: function () { return !panel.hidden; } };
   form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value, false); });
 
   /* ---------- voice in: Whisper in the browser, browser recognizer as fallback; tap to start, tap to stop ---------- */

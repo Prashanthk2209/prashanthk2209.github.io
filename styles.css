@@ -175,3 +175,30 @@ html.dark .askme-status { color: #94a3b8; }
 .hero-photo { width: 10rem; height: 10rem; border-radius: 9999px; object-fit: cover; object-position: 42% 38%; border: 4px solid #fff; box-shadow: 0 10px 30px rgba(15, 23, 42, .15), 0 0 0 1px #e2e8f0; background: #f1f5f9; }
 html.dark .hero-photo { border-color: #0f172a; box-shadow: 0 10px 30px rgba(0, 0, 0, .4), 0 0 0 1px #1e293b; }
 @media (max-width: 1023px) { .hero-photo { width: 8.5rem; height: 8.5rem; } }
+
+/* "Hey Prashanth" hands-free mode (voice.js) */
+.heyp-border { position: fixed; inset: 0; z-index: 70; pointer-events: none; opacity: 0; transition: opacity .35s ease; padding: 6px; border-radius: 0;
+  background: conic-gradient(from var(--heyp-angle, 0deg), #14b8a6, #6366f1, #ec4899, #f59e0b, #22d3ee, #14b8a6);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; }
+@property --heyp-angle { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@keyframes heyp-spin { to { --heyp-angle: 360deg; } }
+@keyframes heyp-breathe { 0%, 100% { padding: 5px; opacity: .85; } 50% { padding: 9px; opacity: 1; } }
+html[data-voice="waking"] .heyp-border, html[data-voice="listening"] .heyp-border { opacity: 1; animation: heyp-spin 3s linear infinite, heyp-breathe 1.6s ease-in-out infinite; }
+html[data-voice="thinking"] .heyp-border { opacity: 1; animation: heyp-spin .9s linear infinite; padding: 6px; }
+html[data-voice="speaking"] .heyp-border { opacity: 1; animation: heyp-spin 6s linear infinite, heyp-breathe 2.4s ease-in-out infinite; }
+.heyp-caption { position: fixed; left: 50%; bottom: 5.5rem; z-index: 71; transform: translateX(-50%); width: min(44rem, calc(100vw - 2rem)); display: grid; gap: .4rem; pointer-events: none; }
+.heyp-q, .heyp-a { border-radius: 1rem; padding: .7rem 1rem; font-size: 1.05rem; line-height: 1.5; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(15, 23, 42, .18); }
+.heyp-q { justify-self: end; background: rgba(15, 118, 110, .92); color: #fff; font-weight: 500; max-width: 85%; }
+.heyp-a { justify-self: start; background: rgba(255, 255, 255, .92); color: #0f172a; border: 1px solid rgba(226, 232, 240, .9); }
+html.dark .heyp-a { background: rgba(15, 23, 42, .92); color: #f1f5f9; border-color: rgba(51, 65, 85, .9); }
+.heyp-pill { position: fixed; left: 1rem; bottom: 1rem; z-index: 60; display: inline-flex; align-items: center; gap: .5rem; padding: .5rem .85rem; border-radius: 9999px; font-size: .82rem; font-weight: 500; color: #334155; background: rgba(255, 255, 255, .9); border: 1px solid #e2e8f0; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); box-shadow: 0 4px 14px rgba(15, 23, 42, .08); max-width: calc(100vw - 9rem); }
+html.dark .heyp-pill { color: #e2e8f0; background: rgba(15, 23, 42, .9); border-color: #334155; }
+.heyp-dot { width: .55rem; height: .55rem; border-radius: 9999px; background: #94a3b8; flex: none; }
+html[data-voice="idle"] .heyp-dot { background: #14b8a6; box-shadow: 0 0 0 0 rgba(20, 184, 166, .5); animation: heyp-dot 2.4s ease-out infinite; }
+html[data-voice="waking"] .heyp-dot, html[data-voice="listening"] .heyp-dot { background: #ef4444; animation: heyp-dot 1s ease-out infinite; }
+html[data-voice="thinking"] .heyp-dot { background: #6366f1; animation: heyp-dot .7s ease-out infinite; }
+html[data-voice="speaking"] .heyp-dot { background: #14b8a6; animation: heyp-dot 1.4s ease-out infinite; }
+@keyframes heyp-dot { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, .45); } 100% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } }
+@media (max-width: 640px) { .heyp-pill { bottom: 4.6rem; left: 50%; transform: translateX(-50%); max-width: calc(100vw - 2rem); } .heyp-caption { bottom: 8.5rem; } }
+@media (prefers-reduced-motion: reduce) { .heyp-border, .heyp-dot { animation-duration: 8s !important; } }
+@media print { #heyp { display: none !important; } }
