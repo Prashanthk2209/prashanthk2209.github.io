@@ -96,7 +96,7 @@ window.PORTFOLIO_KB = [
   "section": "experience",
   "role": "Tech Detectives Inc.",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Cut query time 70–80% on a 17B-row Snowflake security-event workload: traced the bottleneck to repeated raw-table scans and semi-structured attribute parsing, then moved high-use attributes into incrementally refreshed relational tables."
+  "text": "At Tech Detectives Inc.: Cut average query time from 8 minutes to 1–2 minutes on a 17B-row Snowflake security-event workload: traced the bottleneck to repeated raw-table scans and semi-structured attribute parsing, then moved high-use attributes into incrementally refreshed relational tables."
  },
  {
   "id": 15,
@@ -306,7 +306,7 @@ window.PORTFOLIO_KB = [
   "section": "story",
   "role": "Tech Detectives Inc.",
   "kind": "story",
-  "text": "At Tech Detectives Inc.: Improved a Snowflake security workload of approximately 17B rows by identifying repeated raw-table scans and semi-structured attribute parsing as the primary bottleneck, then moving frequently queried attributes into incrementally refreshed relational structures; reported query time fell by approximately 70–80%."
+  "text": "At Tech Detectives Inc.: Improved a Snowflake security workload of approximately 17B rows by identifying repeated raw-table scans and semi-structured attribute parsing as the primary bottleneck, then moving frequently queried attributes into incrementally refreshed relational structures; average query time fell from 8 minutes to 1–2 minutes."
  },
  {
   "id": 45,
@@ -362,7 +362,7 @@ window.PORTFOLIO_KB = [
   "section": "story",
   "role": "Tech Detectives Inc.",
   "kind": "story",
-  "text": "At Tech Detectives Inc.: Cut query time 70–80% on a 17B-row Snowflake security-event workload after tracing the bottleneck to repeated raw-table scans and semi-structured attribute parsing; moved high-use attributes into incrementally refreshed relational structures."
+  "text": "At Tech Detectives Inc.: Cut average query time from 8 minutes to 1–2 minutes on a 17B-row Snowflake security-event workload after tracing the bottleneck to repeated raw-table scans and semi-structured attribute parsing; moved high-use attributes into incrementally refreshed relational structures."
  },
  {
   "id": 53,
@@ -390,7 +390,7 @@ window.PORTFOLIO_KB = [
   "section": "story",
   "role": "Triangulum Insights",
   "kind": "story",
-  "text": "At Triangulum Insights: Managed Redshift reporting tables containing approximately 450M records each, using incremental stored-procedure processing and sequenced warehouse loads to refresh large datasets without full reloads."
+  "text": "At Triangulum Insights: Managed a 15-table Redshift gold layer of 100–450M rows per table, using incremental stored-procedure processing and sequenced warehouse loads to refresh large datasets without full reloads."
  },
  {
   "id": 57,

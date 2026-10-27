@@ -7,7 +7,7 @@ window.PORTFOLIO = {
   meta: {
     siteTitle: "Prashanth Kumar Sirusala | Data Engineer",
     description:
-      "Data Engineer in Miami, FL with 5+ years on AWS, Snowflake and Redshift. Made a 17B-row Snowflake workload 70-80% faster, cut an 18-hour refresh to 2 hours, and put Claude-based data-loss checks into CI.",
+      "Data Engineer in Miami, FL with 5+ years on AWS, Snowflake and Redshift. Took average query time on a 17B-row Snowflake workload from 8 minutes to 1-2, cut an 18-hour refresh to 2 hours, and put Claude-based data-loss checks into CI.",
     // Replace with the final URL once deployed (see DEPLOY.md).
     canonical: "https://prashanthk2209.github.io/",
     ogImage: "og.png"
@@ -20,7 +20,7 @@ window.PORTFOLIO = {
     headline: "Data Engineer building cloud data platforms with security built in and AI in the loop.",
     intro: [
       "5+ years on AWS, Snowflake and Redshift for healthcare, security-event and ad-tech data; owns pipelines end to end, from ingestion and modeling to orchestration, monitoring and governance.",
-      "Made a 17-billion-row Snowflake workload 70-80% faster, cut an 18-hour reporting refresh to 2 hours, and put Claude-based data-loss checks into CI."
+      "Took average query time on a 17-billion-row Snowflake workload from 8 minutes to 1-2, cut an 18-hour reporting refresh to 2 hours, and put Claude-based data-loss checks into CI."
     ],
     location: "Miami, FL",
     workMode: "Remote or hybrid, open to relocation",
@@ -31,7 +31,7 @@ window.PORTFOLIO = {
     phoneHref: "tel:+17865616223",
     linkedin: "https://www.linkedin.com/in/psirusala",
     github: "",
-    resumeFile: "Prashanth_kumar_sirusala.pdf?v=202610201343",
+    resumeFile: "Prashanth_kumar_sirusala.pdf?v=202610270027",
     resumeLabel: "Download Resume (PDF)"
   },
 
@@ -136,13 +136,13 @@ window.PORTFOLIO = {
       },
       {
         id: "snowflake-17b",
-        title: "70-80% faster queries on a 17B-row Snowflake security workload",
+        title: "Average query time from 8 minutes to 1-2 on a 17B-row Snowflake security workload",
         tagline: "Traced slow security-event queries to repeated raw-table scans and semi-structured parsing, then moved the hot attributes into incrementally refreshed relational tables.",
         tags: ["Snowflake", "SQL", "Incremental models", "Semi-structured data", "Performance"],
         featured: true,
         metrics: [
           { value: "17B", label: "rows in the workload" },
-          { value: "70-80%", label: "query time reduction" }
+          { value: "8 → 1-2 min", label: "average query time" }
         ],
         links: { live: "", repo: "", note: "" },
         caseStudy: {
@@ -154,7 +154,7 @@ window.PORTFOLIO = {
             "Pointed the common query paths at the relational layer while the raw tables remained the source of truth for anything not yet promoted."
           ],
           results: [
-            "Reported query time fell by approximately 70-80% on the affected workload.",
+            "Average query time fell from 8 minutes to 1-2 minutes on the affected workload.",
             "Analysts stopped paying the parsing cost on every query, and the raw tables stopped being scanned for routine questions."
           ],
           learnings: [
@@ -266,7 +266,7 @@ window.PORTFOLIO = {
         end: "Present",
         summary: "Own AWS and Snowflake data platforms end to end across batch, streaming, event-driven, API and CDC workloads.",
         bullets: [
-          "Cut query time 70-80% on a 17B-row Snowflake security-event workload by tracing the bottleneck to repeated raw-table scans and semi-structured parsing, then moving high-use attributes into incrementally refreshed relational tables.",
+          "Cut average query time from 8 minutes to 1-2 minutes on a 17B-row Snowflake security-event workload by tracing the bottleneck to repeated raw-table scans and semi-structured parsing, then moving high-use attributes into incrementally refreshed relational tables.",
           "Modernized legacy SQL Server and SSIS reporting with CDC into S3, Apache Iceberg and Athena, orchestrated by Step Functions; the refresh window dropped from 18 hours to 2.",
           "Added AI-assisted ETL coverage checks to pull-request approvals: GitHub Actions calls AWS Lambda and the enterprise Claude API to trace raw-to-curated coverage and flag data-loss gaps before release.",
           "Built an event-driven file-processing architecture on AWS: SQS queues buffer incoming source files, Step Functions route each file to a source-specific Glue job, and a completion gate holds downstream fact loads until every required feed has landed.",
@@ -361,7 +361,7 @@ window.PORTFOLIO = {
     heading: "Achievements & Recognition",
     intro: "Certifications and the measurable results behind the resume.",
     results: [
-      { value: "70-80%", label: "faster queries on a 17B-row Snowflake workload", icon: "gauge" },
+      { value: "8 → 1-2 min", label: "average query time on a 17B-row Snowflake workload", icon: "gauge" },
       { value: "18 h to 2 h", label: "reporting refresh after the SSIS to Iceberg/Athena migration", icon: "timer" },
       { value: "450M", label: "rows per Redshift reporting table, refreshed incrementally", icon: "layers" },
       { value: "50+", label: "Salesforce Marketing Cloud automations supported", icon: "send" },
