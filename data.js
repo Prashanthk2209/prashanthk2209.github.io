@@ -31,7 +31,7 @@ window.PORTFOLIO = {
     phoneHref: "tel:+17865616223",
     linkedin: "https://www.linkedin.com/in/psirusala",
     github: "",
-    resumeFile: "Prashanth_kumar_sirusala.pdf?v=202610270027",
+    resumeFile: "Prashanth_kumar_sirusala.pdf?v=202610270046",
     resumeLabel: "Download Resume (PDF)"
   },
 
@@ -175,7 +175,7 @@ window.PORTFOLIO = {
         ],
         links: { live: "", repo: "", note: "" },
         caseStudy: {
-          problem: "Legacy reporting ran on SQL Server with SSIS packages. The refresh took about 18 hours, which meant reports were a day behind and any failure pushed the next cycle out further.",
+          problem: "Legacy reporting ran on SQL Server with SSIS packages across 67 tables and about 1 TB. The refresh took about 18 hours, which meant reports were a day behind and any failure pushed the next cycle out further.",
           approach: "Stop moving whole tables on a schedule. Capture changes from the source instead, land them in open table format on S3, and let dependent transformations run as soon as their inputs are ready rather than in one long serial chain.",
           implementation: [
             "Change data capture from the SQL Server sources into S3.",
@@ -267,14 +267,14 @@ window.PORTFOLIO = {
         summary: "Own AWS and Snowflake data platforms end to end across batch, streaming, event-driven, API and CDC workloads.",
         bullets: [
           "Cut average query time from 8 minutes to 1-2 minutes on a 17B-row Snowflake security-event workload by tracing the bottleneck to repeated raw-table scans and semi-structured parsing, then moving high-use attributes into incrementally refreshed relational tables.",
-          "Modernized legacy SQL Server and SSIS reporting with CDC into S3, Apache Iceberg and Athena, orchestrated by Step Functions; the refresh window dropped from 18 hours to 2.",
+          "Modernized a 67-table, 1 TB legacy SQL Server and SSIS reporting stack into an S3, Apache Iceberg and Athena lakehouse fed by CDC and orchestrated by Step Functions, cutting the refresh window from 18 hours to 2 hours.",
           "Added AI-assisted ETL coverage checks to pull-request approvals: GitHub Actions calls AWS Lambda and the enterprise Claude API to trace raw-to-curated coverage and flag data-loss gaps before release.",
           "Built an event-driven file-processing architecture on AWS: SQS queues buffer incoming source files, Step Functions route each file to a source-specific Glue job, and a completion gate holds downstream fact loads until every required feed has landed.",
           "Set up Snowflake MCP servers and a business-facing chatbot over governed data, cutting ad hoc engineering requests and the turnaround on everyday data questions.",
           "Run Glue, Step Functions and Snowflake pipelines across batch, streaming (Amazon Kinesis, Apache Kafka), event-driven, API and CDC workloads, with retries, dependency control and recoverable failure paths.",
           "Write the PySpark and SQL transformations across raw, staging and curated layers: incremental loads, fact and dimension modeling, data quality checks, reconciliation and business rules.",
           "Productionized Airflow/MWAA and dbt workflows for SaaS and API-fed pipelines with reusable landing and watermarking patterns, incremental models, source freshness checks and controlled promotion across environments.",
-          "Assessed warehouse options for a 67-table Aurora PostgreSQL source and a 1 TB analytics footprint, comparing Redshift Serverless, Zero-ETL, DMS CDC and Snowflake against integration and reporting needs.",
+          "Compared Redshift Serverless and Snowflake across 20+ source databases, recommended Snowflake because the client's BI ran on Sigma, then modeled the data and built the dbt models on Snowflake.",
           "Own platform reliability and governance: CloudWatch and Datadog monitoring, Terraform and AWS CDK infrastructure, IAM/KMS controls, lineage, freshness checks and restricted PII handling with controlled identifiers."
         ],
         stack: ["AWS Glue", "Step Functions", "Lambda", "SQS", "EventBridge", "Kinesis", "Kafka", "Snowflake", "Iceberg", "Athena", "PySpark", "dbt", "Airflow/MWAA", "Terraform", "AWS CDK", "Datadog", "Claude API"]
@@ -365,7 +365,7 @@ window.PORTFOLIO = {
       { value: "18 h to 2 h", label: "reporting refresh after the SSIS to Iceberg/Athena migration", icon: "timer" },
       { value: "450M", label: "rows per Redshift reporting table, refreshed incrementally", icon: "layers" },
       { value: "50+", label: "Salesforce Marketing Cloud automations supported", icon: "send" },
-      { value: "67 tables / 1 TB", label: "Aurora PostgreSQL warehouse assessment", icon: "scale" },
+      { value: "20+ databases", label: "Redshift vs Snowflake warehouse assessment", icon: "scale" },
       { value: "10-year", label: "healthcare retention rule turned into archival workflows", icon: "archive" }
     ]
   },

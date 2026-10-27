@@ -103,7 +103,7 @@ window.PORTFOLIO_KB = [
   "section": "experience",
   "role": "Tech Detectives Inc.",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Modernized legacy SQL Server and SSIS reporting with CDC into S3, Apache Iceberg and Athena, orchestrated by Step Functions; the refresh window dropped from 18 hours to 2."
+  "text": "At Tech Detectives Inc.: Modernized a 67-table, 1 TB legacy SQL Server and SSIS reporting stack into an S3, Apache Iceberg and Athena lakehouse fed by CDC and orchestrated by Step Functions, cutting the refresh window from 18 hours to 2 hours."
  },
  {
   "id": 16,
@@ -152,7 +152,7 @@ window.PORTFOLIO_KB = [
   "section": "experience",
   "role": "Tech Detectives Inc.",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Assessed warehouse options for a 67-table Aurora PostgreSQL source and a 1 TB analytics footprint, comparing Redshift Serverless, Zero-ETL, DMS CDC and Snowflake against integration and reporting needs."
+  "text": "At Tech Detectives Inc.: Compared Redshift Serverless and Snowflake across 20+ source databases, recommended Snowflake because the client's BI ran on Sigma, then modeled the data and built the dbt models on Snowflake."
  },
  {
   "id": 23,
@@ -299,7 +299,7 @@ window.PORTFOLIO_KB = [
   "section": "story",
   "role": "Tech Detectives Inc.",
   "kind": "story",
-  "text": "At Tech Detectives Inc.: Modernized legacy SQL Server and SSIS reporting workflows by moving CDC data into S3, Iceberg and Athena and orchestrating dependent transformations with Step Functions, reducing the reported refresh window from 18 hours to 2 hours."
+  "text": "At Tech Detectives Inc.: Modernized legacy SQL Server and SSIS reporting workflows by moving CDC data into S3, Iceberg and Athena and orchestrating dependent transformations with Step Functions, reducing the reported refresh window from 18 hours to 2 hours. The project covered 67 tables and about 1 TB."
  },
  {
   "id": 44,
@@ -327,7 +327,7 @@ window.PORTFOLIO_KB = [
   "section": "story",
   "role": "Tech Detectives Inc.",
   "kind": "story",
-  "text": "At Tech Detectives Inc.: Evaluated warehouse and reporting architecture for a 67-table Aurora PostgreSQL source and an approximately 1 TB analytics footprint, comparing Redshift Serverless, Zero-ETL, DMS CDC and Snowflake against reporting and integration requirements."
+  "text": "At Tech Detectives Inc.: Compared Redshift Serverless and Snowflake across 20+ source databases against reporting and integration requirements."
  },
  {
   "id": 48,
