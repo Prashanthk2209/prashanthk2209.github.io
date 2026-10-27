@@ -299,7 +299,7 @@ window.PORTFOLIO = {
         stack: ["Amazon Redshift", "AWS Glue", "Step Functions", "Lambda", "S3", "Python", "Tableau", "Salesforce Marketing Cloud"]
       },
       {
-        title: "SSIS Engineer",
+        title: "Data Engineer",
         company: "Mindtree",
         location: "",
         start: "Jan 2020",

@@ -215,7 +215,7 @@ window.PORTFOLIO_KB = [
   "section": "experience",
   "role": "Mindtree",
   "kind": "role",
-  "text": "SSIS Engineer at Mindtree, India, January 2020 – May 2022."
+  "text": "Data Engineer at Mindtree, India, January 2020 – May 2022."
  },
  {
   "id": 32,
