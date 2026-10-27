@@ -390,7 +390,7 @@ window.PORTFOLIO_KB = [
   "section": "story",
   "role": "Triangulum Insights",
   "kind": "story",
-  "text": "At Triangulum Insights: Managed a 15-table Redshift gold layer of 100–450M rows per table, using incremental stored-procedure processing and sequenced warehouse loads to refresh large datasets without full reloads."
+  "text": "At Triangulum Insights: Cut the daily refresh of the 15-table Redshift gold layer behind Tableau reporting, 100–450M rows per table, from 3 hours to 20 minutes by replacing full reloads with incremental loads and business-key deduplication."
  },
  {
   "id": 57,
