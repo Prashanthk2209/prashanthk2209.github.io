@@ -103,7 +103,7 @@ window.PORTFOLIO_KB = [
   "section": "experience",
   "role": "Tech Detectives Inc.",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Modernized a 67-table, 1 TB legacy SQL Server and SSIS reporting stack into an S3, Apache Iceberg and Athena lakehouse fed by CDC and orchestrated by Step Functions, cutting the refresh window from 18 hours to 2 hours."
+  "text": "At Tech Detectives Inc.: Modernized a 67-table, 1 TB legacy SQL Server and SSIS reporting stack into an S3 data lake with Apache Iceberg tables queried in Athena, fed by CDC and orchestrated by Step Functions, cutting the refresh window from 18 hours to 2 hours."
  },
  {
   "id": 16,

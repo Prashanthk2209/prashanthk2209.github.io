@@ -31,7 +31,7 @@ window.PORTFOLIO = {
     phoneHref: "tel:+17865616223",
     linkedin: "https://www.linkedin.com/in/psirusala",
     github: "",
-    resumeFile: "Prashanth_kumar_sirusala.pdf?v=202610270057",
+    resumeFile: "Prashanth_kumar_sirusala.pdf?v=202610270100",
     resumeLabel: "Download Resume (PDF)"
   },
 
@@ -267,7 +267,7 @@ window.PORTFOLIO = {
         summary: "Own AWS and Snowflake data platforms end to end across batch, streaming, event-driven, API and CDC workloads.",
         bullets: [
           "Cut average query time from 8 minutes to 1-2 minutes on a 17B-row Snowflake security-event workload by tracing the bottleneck to repeated raw-table scans and semi-structured parsing, then moving high-use attributes into incrementally refreshed relational tables.",
-          "Modernized a 67-table, 1 TB legacy SQL Server and SSIS reporting stack into an S3, Apache Iceberg and Athena lakehouse fed by CDC and orchestrated by Step Functions, cutting the refresh window from 18 hours to 2 hours.",
+          "Modernized a 67-table, 1 TB legacy SQL Server and SSIS reporting stack into an S3 data lake with Apache Iceberg tables queried in Athena, fed by CDC and orchestrated by Step Functions, cutting the refresh window from 18 hours to 2 hours.",
           "Added AI-assisted ETL coverage checks to pull-request approvals: GitHub Actions calls AWS Lambda and the enterprise Claude API to trace raw-to-curated coverage and flag data-loss gaps before release.",
           "Built an event-driven file-processing architecture on AWS: SQS queues buffer incoming source files, Step Functions route each file to a source-specific Glue job, and a completion gate holds downstream fact loads until every required feed has landed.",
           "Set up Snowflake MCP servers and a business-facing chatbot over governed data, cutting ad hoc engineering requests and the turnaround on everyday data questions.",
