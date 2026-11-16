@@ -19,7 +19,7 @@ window.PORTFOLIO_KB = [
   "section": "profile",
   "role": "",
   "kind": "years",
-  "text": "I have about 5 years of data engineering experience: Mindtree (2020 to 2022), Triangulum Insights (2024 to 2025) and Tech Detectives (2025 to present), with an M.S. in Cybersecurity at Florida International University in between."
+  "text": "I have around 6 years of data engineering experience: Mindtree (2019 to 2022, starting as an intern), Capgemini (2024 to 2025) and US Bank (2025 to present), with an M.S. in Cybersecurity at Florida International University in between."
  },
  {
   "id": 4,
@@ -38,460 +38,698 @@ window.PORTFOLIO_KB = [
  {
   "id": 6,
   "section": "skills",
-  "role": "Data Platforms & Data Warehousing",
+  "role": "Languages & Processing",
   "kind": "skills",
-  "text": "Data Platforms & Data Warehousing: Snowflake, Amazon Redshift, PostgreSQL, SQL Server, Apache Iceberg."
+  "text": "Languages & Processing: SQL, Python, PySpark (Apache Spark), Snowpark, dbt, Jinja, Airflow/MWAA, SSIS, Informatica, Fivetran, Apache Kafka, REST and GraphQL APIs, SFTP, ETL/ELT, CDC, window functions."
  },
  {
   "id": 7,
   "section": "skills",
-  "role": "Data Engineering & Modeling",
+  "role": "Warehousing & Modeling",
   "kind": "skills",
-  "text": "Data Engineering & Modeling: SQL, Python, PySpark, Spark, dbt, SSIS, Airflow/MWAA, ETL/ELT, CDC, incremental models, dimensional modeling, star schemas, window functions, data quality checks, reconciliation."
+  "text": "Warehousing & Modeling: Snowflake, Amazon Redshift, PostgreSQL, SQL Server, Oracle, DB2, Apache Iceberg, data warehousing, data lakes, lakehouse, dimensional data modeling, star schemas, materialized views, data quality and reconciliation checks."
  },
  {
   "id": 8,
   "section": "skills",
-  "role": "AWS & Cloud",
+  "role": "AWS",
   "kind": "skills",
-  "text": "AWS & Cloud: Glue, Lambda, Step Functions, S3, Redshift, Athena, Glue Data Catalog, EventBridge, SQS, SNS, DMS, Aurora PostgreSQL, IAM, KMS, CloudWatch, Secrets Manager, AWS CDK."
+  "text": "AWS: Glue, Glue Data Catalog, Lambda, Step Functions, S3, Athena, Kinesis, EventBridge, SQS, SNS, DMS, AppFlow, Aurora, DynamoDB, Redshift Data API, IAM, KMS, Secrets Manager, CloudWatch."
  },
  {
   "id": 9,
   "section": "skills",
-  "role": "Streaming & Integration",
+  "role": "DevOps & Monitoring",
   "kind": "skills",
-  "text": "Streaming & Integration: Amazon Kinesis, Apache Kafka, streaming pipelines, event-driven pipelines, batch pipelines, REST APIs, SaaS and API ingestion, watermarking patterns."
+  "text": "DevOps & Monitoring: Terraform, AWS CDK, Git, GitHub Actions, Bitbucket, CI/CD, Docker, Kubernetes, Snyk, Datadog."
  },
  {
   "id": 10,
   "section": "skills",
-  "role": "Infrastructure, DevOps & Monitoring",
+  "role": "Security & Governance",
   "kind": "skills",
-  "text": "Infrastructure, DevOps & Monitoring: Terraform, AWS CDK, Docker, GitHub Actions, CI/CD, Datadog, CloudWatch monitoring."
+  "text": "Security & Governance: HIPAA, GDPR, CCPA, PHI/PII handling, Snowflake RBAC, data masking, data retention, lineage."
  },
  {
   "id": 11,
   "section": "skills",
-  "role": "GenAI / LLM Integration",
+  "role": "GenAI & BI",
   "kind": "skills",
-  "text": "GenAI / LLM Integration: Claude API, AI-assisted ETL coverage checks in CI (GitHub Actions + Lambda), Snowflake MCP servers, governed-data chatbot, Snowflake Cortex."
+  "text": "GenAI & BI: Claude and GPT APIs, Snowflake Cortex (LLM functions), prompt-driven SQL generation, Snowflake MCP servers, Streamlit, Tableau, Sigma, Power BI, Power Query, Salesforce Marketing Cloud."
  },
  {
   "id": 12,
   "section": "skills",
-  "role": "Security, Governance & Analytics",
+  "role": "Delivery & Operations",
   "kind": "skills",
-  "text": "Security, Governance & Analytics: Snowflake RBAC, AWS IAM, KMS encryption, least-privilege access, HIPAA PHI/PII handling, data masking, lineage, data freshness monitoring, Tableau, Salesforce Marketing Cloud."
+  "text": "Delivery & Operations: production support, on-call, troubleshooting, root-cause analysis, performance tuning, stakeholder communication, requirements gathering, cross-functional collaboration, team leadership, technical documentation."
  },
  {
   "id": 13,
   "section": "experience",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "role",
-  "text": "Data Engineer at Tech Detectives Inc., Miami, FL, February 2025 – Present."
+  "text": "Data Engineer at US Bank, Miami, FL, February 2025 – Present."
  },
  {
   "id": 14,
   "section": "experience",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Cut average query time from 8 minutes to 1–2 minutes on a 17B-row Snowflake security-event workload: traced the bottleneck to repeated raw-table scans and semi-structured attribute parsing, then moved high-use attributes into incrementally refreshed relational tables."
+  "text": "At US Bank: Sped up the bank's 17B-row Snowflake security-event workload from 8 minutes to 1–2 minutes by rewriting the window functions and moving frequently used fields into incrementally refreshed tables."
  },
  {
   "id": 15,
   "section": "experience",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Modernized a 67-table, 1 TB legacy SQL Server and SSIS reporting stack into an S3 data lake with Apache Iceberg tables queried in Athena, fed by CDC and orchestrated by Step Functions, cutting the refresh window from 18 hours to 2 hours."
+  "text": "At US Bank: Moved a 1 TB legacy SQL Server/SSIS reporting system (67 tables) onto an AWS data lake with Iceberg tables, Glue and Athena, using DMS change data capture and Step Functions. Refresh time dropped from 18 hours to 2."
  },
  {
   "id": 16,
   "section": "experience",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Added AI-assisted ETL coverage checks to pull-request approvals: GitHub Actions calls AWS Lambda and the enterprise Claude API to trace raw-to-curated coverage and flag data-loss gaps before release."
+  "text": "At US Bank: Built two dbt projects of about 150 models each, one on Snowflake and one on Redshift with Airflow. Organized them in bronze, silver and gold layers with reusable macros, incremental loads and reconciliation checks so finance reports tie back to source data."
  },
  {
   "id": 17,
   "section": "experience",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Built an event-driven file-processing architecture on AWS: SQS queues buffer incoming source files, Step Functions route each file to a source-specific Glue job, and a completion gate holds downstream fact loads until every required feed has landed."
+  "text": "At US Bank: Created reusable PySpark, Snowpark and SQL ingestion for APIs, SFTP and SaaS sources (Fivetran, Informatica, AppFlow) that loads only new records each run, and added Kinesis and Kafka streaming alongside batch and CDC pipelines."
  },
  {
   "id": 18,
   "section": "experience",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Set up Snowflake MCP servers and a business-facing chatbot over governed data, cutting ad hoc engineering requests and the turnaround on day-to-day data questions."
+  "text": "At US Bank: Designed an event-driven file pipeline with EventBridge, SQS, Step Functions, Glue, DynamoDB and SNS. Fact tables load only after every feed has arrived, so reports never run on partial data, and failures trigger alerts right away."
  },
  {
   "id": 19,
   "section": "experience",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Own AWS Glue, Step Functions and Snowflake pipelines across batch, streaming (Amazon Kinesis, Apache Kafka), event-driven, API and CDC workloads, with retries, dependency control and recoverable failure paths."
+  "text": "At US Bank: Handled on-call for client production pipelines (1–2 requests a day), tracing failed Glue jobs, Step Functions runs and Snowflake loads through CloudWatch and Datadog alerts, and fixing most issues within 2–3 hours."
  },
  {
   "id": 20,
   "section": "experience",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Write the PySpark and SQL transformations across raw, staging and curated layers: incremental loads, fact and dimension modeling, data quality checks, reconciliation and business rules."
+  "text": "At US Bank: Set up CI/CD with GitHub Actions and Bitbucket, packaging jobs in Docker on Kubernetes with Snyk scans gating releases. Added a check on staging pull requests that calls the Claude API and flags ETL coverage below 90%."
  },
  {
   "id": 21,
   "section": "experience",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Productionized Airflow/MWAA and dbt workflows for SaaS and API-fed pipelines with reusable landing and watermarking patterns, incremental models, source freshness checks and controlled promotion across environments."
+  "text": "At US Bank: Built a Streamlit chatbot on Snowflake MCP servers and Cortex LLM functions (Claude and GPT APIs) so business users can self-serve approved data under RBAC, cutting ad hoc data requests from about 10 a week to 2."
  },
  {
   "id": 22,
   "section": "experience",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "bullet",
-  "text": "At Tech Detectives Inc.: Compared Redshift Serverless and Snowflake across 20+ source databases, recommended Snowflake because the client's BI ran on Sigma, then modeled the data and built the dbt models on Snowflake."
+  "text": "At US Bank: Owned customer PII governance under GDPR and CCPA using least-privilege IAM, Snowflake RBAC, data masking, KMS encryption, and lineage and freshness checks for audits. Managed AWS infrastructure in Terraform and CDK, with secrets in Secrets Manager."
  },
  {
   "id": 23,
   "section": "experience",
-  "role": "Triangulum Insights",
-  "kind": "role",
-  "text": "Data Engineer at Triangulum Insights, Remote, January 2024 – February 2025."
+  "role": "US Bank",
+  "kind": "bullet",
+  "text": "At US Bank: Compared Redshift Serverless and Snowflake across 20+ source databases (Oracle, DB2, PostgreSQL on Aurora, SQL Server), recommended Snowflake for the client's Sigma reporting, and built the dbt models on it."
  },
  {
   "id": 24,
   "section": "experience",
-  "role": "Triangulum Insights",
+  "role": "US Bank",
   "kind": "bullet",
-  "text": "At Triangulum Insights: Maintained Redshift reporting tables of 450M rows each with incremental stored procedures and sequenced loads, refreshing them without full reloads."
+  "text": "At US Bank: Worked with analysts and business stakeholders in a regulated banking environment to gather reporting requirements, set sprint priorities and communicate delivery status and trade-offs. Documented architecture, data flows, lineage and support procedures for audit review."
  },
  {
   "id": 25,
   "section": "experience",
-  "role": "Triangulum Insights",
+  "role": "US Bank",
   "kind": "bullet",
-  "text": "At Triangulum Insights: Built the AWS platform for an advertising and consumer panel-data business on S3, Glue, Step Functions, Lambda and Redshift, carrying source data from landing to reporting-ready tables."
+  "text": "At US Bank: Led two data engineers on AWS and Snowflake client work while building pipelines alongside them."
  },
  {
   "id": 26,
   "section": "experience",
-  "role": "Triangulum Insights",
-  "kind": "bullet",
-  "text": "At Triangulum Insights: Delivered curated Redshift datasets to Tableau users and supported 50+ Salesforce Marketing Cloud automations for scheduled refreshes, query activities and campaign sends."
+  "role": "Capgemini",
+  "kind": "role",
+  "text": "Data Engineer at Capgemini, Remote, January 2024 – February 2025."
  },
  {
   "id": 27,
   "section": "experience",
-  "role": "Triangulum Insights",
+  "role": "Capgemini",
   "kind": "bullet",
-  "text": "At Triangulum Insights: Turned reporting-team grain, source and refresh requirements into Redshift table designs and the Glue and Step Functions pipelines behind them."
+  "text": "At Capgemini: Maintained and extended the AWS data platform (S3, Glue, Step Functions, Lambda, Redshift) for an advertising and consumer panel-data business, from file landing to data warehouse tables."
  },
  {
   "id": 28,
   "section": "experience",
-  "role": "Triangulum Insights",
+  "role": "Capgemini",
   "kind": "bullet",
-  "text": "At Triangulum Insights: Diagnosed long-running Redshift procedures and workload-management pressure with system tables, then re-sequenced execution and materialized-view refreshes around real workload patterns."
+  "text": "At Capgemini: Cut the daily refresh of a 15-table Redshift gold layer (100–450M rows per table) behind Tableau from 3 hours to 20 minutes using incremental loads and business-key deduplication to keep reported figures accurate."
  },
  {
   "id": 29,
   "section": "experience",
-  "role": "Triangulum Insights",
+  "role": "Capgemini",
   "kind": "bullet",
-  "text": "At Triangulum Insights: Applied business-key and ingestion-order deduplication so new partitions merge into the reporting set while the latest valid record wins."
+  "text": "At Capgemini: Tuned long-running Redshift stored procedures by reading workload-management queue pressure from system tables and rescheduling runs and materialized view refreshes away from peak windows."
  },
  {
   "id": 30,
   "section": "experience",
-  "role": "Triangulum Insights",
+  "role": "Capgemini",
   "kind": "bullet",
-  "text": "At Triangulum Insights: Handled source and pipeline failures by isolating malformed files, fixing schema drift and metadata issues, and reprocessing only the affected inputs."
+  "text": "At Capgemini: Automated intake of external reporting and CRM data from APIs into S3 and Redshift with scheduled Python jobs, using Lambda and the Redshift Data API."
  },
  {
   "id": 31,
+  "section": "experience",
+  "role": "Capgemini",
+  "kind": "bullet",
+  "text": "At Capgemini: Designed Redshift tables and their Glue and Step Functions pipelines from the reporting team's grain, source and refresh requirements, keeping them informed during data issues and reprocessing."
+ },
+ {
+  "id": 32,
+  "section": "experience",
+  "role": "Capgemini",
+  "kind": "bullet",
+  "text": "At Capgemini: Supported 50+ Salesforce Marketing Cloud automations and the Redshift datasets feeding them."
+ },
+ {
+  "id": 33,
+  "section": "experience",
+  "role": "Capgemini",
+  "kind": "bullet",
+  "text": "At Capgemini: Resolved production pipeline failures, isolating malformed files and fixing schema drift and metadata issues."
+ },
+ {
+  "id": 34,
+  "section": "experience",
+  "role": "Capgemini",
+  "kind": "bullet",
+  "text": "At Capgemini: Documented Redshift table designs, pipeline architecture and load schedules for the reporting team."
+ },
+ {
+  "id": 35,
   "section": "experience",
   "role": "Mindtree",
   "kind": "role",
   "text": "Data Engineer at Mindtree, India, January 2020 – May 2022."
  },
  {
-  "id": 32,
-  "section": "experience",
-  "role": "Mindtree",
-  "kind": "bullet",
-  "text": "At Mindtree: Built SSIS batch integrations moving healthcare data from source systems through SQL Server raw and staging layers into standardized reporting tables and views."
- },
- {
-  "id": 33,
-  "section": "experience",
-  "role": "Mindtree",
-  "kind": "bullet",
-  "text": "At Mindtree: Wrote SQL Server stored procedures, joins and scheduled transformations for raw-to-published data movement."
- },
- {
-  "id": 34,
-  "section": "experience",
-  "role": "Mindtree",
-  "kind": "bullet",
-  "text": "At Mindtree: Validated nightly outputs with source-to-target row counts and reconciliation checks, chasing missing records, duplicates and type conflicts before publication."
- },
- {
-  "id": 35,
-  "section": "experience",
-  "role": "Mindtree",
-  "kind": "bullet",
-  "text": "At Mindtree: Turned a 10-year healthcare retention rule into repeatable archival workflows, including an AWS-based archive for historical data."
- },
- {
   "id": 36,
+  "section": "experience",
+  "role": "Mindtree",
+  "kind": "bullet",
+  "text": "At Mindtree: Built nightly SSIS batch integrations moving 1–2M healthcare rows from 30+ source systems through SQL Server raw and staging layers into reporting tables and views behind Power BI (Power Query) reports."
+ },
+ {
+  "id": 37,
+  "section": "experience",
+  "role": "Mindtree",
+  "kind": "bullet",
+  "text": "At Mindtree: Built a HIPAA/GDPR-aligned compliance retention pipeline archiving records past the 10-year policy from Oracle, DB2 and SQL Server healthcare databases to AWS, keeping 100M+ in-policy rows in each."
+ },
+ {
+  "id": 38,
+  "section": "experience",
+  "role": "Mindtree",
+  "kind": "bullet",
+  "text": "At Mindtree: Agreed data retention rules with business stakeholders on which healthcare records to keep or purge, then implemented them as the pipeline's purge and archive logic."
+ },
+ {
+  "id": 39,
+  "section": "experience",
+  "role": "Mindtree",
+  "kind": "bullet",
+  "text": "At Mindtree: Supported 15–20 nightly SSIS packages in production, reconciling source-to-target row counts before publication to protect data integrity, tracing failures to root cause and escalating source delays."
+ },
+ {
+  "id": 40,
+  "section": "experience",
+  "role": "Mindtree",
+  "kind": "bullet",
+  "text": "At Mindtree: Applied PHI/PII data masking, exclusion and access controls across nightly healthcare pipelines."
+ },
+ {
+  "id": 41,
+  "section": "experience",
+  "role": "Mindtree",
+  "kind": "bullet",
+  "text": "At Mindtree: Documented SSIS package designs, source-to-target mappings and nightly support procedures."
+ },
+ {
+  "id": 42,
+  "section": "experience",
+  "role": "Mindtree",
+  "kind": "role",
+  "text": "Software Engineer Intern at Mindtree, India, June 2019 – December 2019."
+ },
+ {
+  "id": 43,
+  "section": "experience",
+  "role": "Mindtree",
+  "kind": "bullet",
+  "text": "At Mindtree: Trained in data engineering and SSIS, building ETL packages with control flows, data flow transformations, lookups and error handling to load and clean source records."
+ },
+ {
+  "id": 44,
+  "section": "experience",
+  "role": "Mindtree",
+  "kind": "bullet",
+  "text": "At Mindtree: Monitored scheduled ETL jobs in SQL Server Agent during on-call shifts and escalated failed or late loads before reporting users saw stale data."
+ },
+ {
+  "id": 45,
+  "section": "experience",
+  "role": "Mindtree",
+  "kind": "bullet",
+  "text": "At Mindtree: Supported production with senior engineers, using SQL Server Agent history and package error logs to find why ETL jobs failed or loaded bad data, then rerunning after fixes."
+ },
+ {
+  "id": 46,
+  "section": "experience",
+  "role": "Mindtree",
+  "kind": "bullet",
+  "text": "At Mindtree: Resolved change requests on SSIS packages, SQL queries and source-to-target mappings, testing in development and documenting before production release."
+ },
+ {
+  "id": 47,
   "section": "certifications",
   "role": "",
   "kind": "certs",
   "text": "Certifications: AWS Certified Solutions Architect – Associate and CompTIA Security+ and SnowPro Core (in progress) and AWS Certified Data Engineer – Associate (in progress)."
  },
  {
-  "id": 37,
+  "id": 48,
   "section": "education",
   "role": "Florida International University",
   "kind": "education",
-  "text": "M.S. Cybersecurity, Florida International University."
- },
- {
-  "id": 38,
-  "section": "education",
-  "role": "Rajiv Gandhi University of Knowledge Technologies",
-  "kind": "education",
-  "text": "B.Tech Computer Science & Engineering, Rajiv Gandhi University of Knowledge Technologies."
- },
- {
-  "id": 39,
-  "section": "story",
-  "role": "Tech Detectives Inc.",
-  "kind": "story",
-  "text": "At Tech Detectives Inc.: Developed and supported AWS and Snowflake data platforms spanning ingestion, transformation, warehousing, reporting and production operations across batch, event-driven, API and CDC workloads."
- },
- {
-  "id": 40,
-  "section": "story",
-  "role": "Tech Detectives Inc.",
-  "kind": "story",
-  "text": "At Tech Detectives Inc.: Implemented batch, streaming and event-driven ingestion and orchestration patterns with AWS Glue, Lambda, Step Functions, SQS, EventBridge, Amazon Kinesis and Apache Kafka, including dependency handling, retries and controlled recovery for failed or overlapping pipeline runs."
- },
- {
-  "id": 41,
-  "section": "story",
-  "role": "Tech Detectives Inc.",
-  "kind": "story",
-  "text": "At Tech Detectives Inc.: Developed PySpark and SQL transformations across raw, staging and curated layers, covering incremental processing, fact and dimension modeling, data quality checks, reconciliation and business-rule implementation."
- },
- {
-  "id": 42,
-  "section": "story",
-  "role": "Tech Detectives Inc.",
-  "kind": "story",
-  "text": "At Tech Detectives Inc.: Supported queue-backed file processing in which incoming source files were routed to source-specific Glue workloads and downstream fact processing ran only after required feeds completed successfully."
- },
- {
-  "id": 43,
-  "section": "story",
-  "role": "Tech Detectives Inc.",
-  "kind": "story",
-  "text": "At Tech Detectives Inc.: Modernized legacy SQL Server and SSIS reporting workflows by moving CDC data into S3, Iceberg and Athena and orchestrating dependent transformations with Step Functions, reducing the reported refresh window from 18 hours to 2 hours. The project covered 67 tables and about 1 TB."
- },
- {
-  "id": 44,
-  "section": "story",
-  "role": "Tech Detectives Inc.",
-  "kind": "story",
-  "text": "At Tech Detectives Inc.: Improved a Snowflake security workload of approximately 17B rows by identifying repeated raw-table scans and semi-structured attribute parsing as the primary bottleneck, then moving frequently queried attributes into incrementally refreshed relational structures; average query time fell from 8 minutes to 1–2 minutes."
- },
- {
-  "id": 45,
-  "section": "story",
-  "role": "Tech Detectives Inc.",
-  "kind": "story",
-  "text": "At Tech Detectives Inc.: Maintained Airflow/MWAA and dbt transformation workflows for analytics pipelines, including dependency management, incremental models, source freshness checks and controlled promotion across environments."
- },
- {
-  "id": 46,
-  "section": "story",
-  "role": "Tech Detectives Inc.",
-  "kind": "story",
-  "text": "At Tech Detectives Inc.: Standardized external-data ingestion from SaaS platforms and APIs using reusable landing, watermarking and transformation patterns, with Athena or Glue preparing analytics-ready datasets for downstream reporting and marketing integrations."
- },
- {
-  "id": 47,
-  "section": "story",
-  "role": "Tech Detectives Inc.",
-  "kind": "story",
-  "text": "At Tech Detectives Inc.: Compared Redshift Serverless and Snowflake across 20+ source databases against reporting and integration requirements."
- },
- {
-  "id": 48,
-  "section": "story",
-  "role": "Tech Detectives Inc.",
-  "kind": "story",
-  "text": "At Tech Detectives Inc.: Managed platform reliability and governance through CloudWatch and Datadog monitoring, Terraform and AWS CDK infrastructure, IAM/KMS controls, lineage and freshness checks, and restricted handling of PII using controlled identifiers and access patterns."
+  "text": "Master of Science (M.S.), Cybersecurity, Florida International University."
  },
  {
   "id": 49,
-  "section": "story",
-  "role": "Tech Detectives Inc.",
-  "kind": "story",
-  "text": "At Tech Detectives Inc.: Embedded AI-assisted ETL coverage validation into pull-request approvals: GitHub Actions triggers AWS Lambda and the enterprise Claude API to trace raw-to-curated pipeline coverage and flag potential data-loss gaps before release."
+  "section": "education",
+  "role": "Rajiv Gandhi University of Knowledge Technologies",
+  "kind": "education",
+  "text": "Bachelor of Technology (B.Tech), Computer Science & Engineering, Rajiv Gandhi University of Knowledge Technologies."
  },
  {
   "id": 50,
   "section": "story",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Tech Detectives Inc.: Configured Snowflake MCP servers and delivered a business-facing chatbot for governed data access, reducing ad hoc engineering requests and shortening turnaround for day-to-day data questions."
+  "text": "At US Bank: Led a team of two data engineers while staying hands-on: I owned delivery of the team's AWS and Snowflake pipeline work and kept building alongside them."
  },
  {
   "id": 51,
   "section": "story",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Tech Detectives Inc.: File-processing architecture (event-driven, on AWS): SQS queues buffer incoming source files; Step Functions route each file to a source-specific Glue job; a completion gate holds downstream fact loads until every required feed has landed, so facts are never built on a partial day."
+  "text": "At US Bank: Developed and supported AWS and Snowflake data platforms spanning ingestion, transformation, warehousing, reporting and production operations across batch, event-driven, API and CDC workloads."
  },
  {
   "id": 52,
   "section": "story",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Tech Detectives Inc.: Cut average query time from 8 minutes to 1–2 minutes on a 17B-row Snowflake security-event workload after tracing the bottleneck to repeated raw-table scans and semi-structured attribute parsing; moved high-use attributes into incrementally refreshed relational structures."
+  "text": "At US Bank: Implemented batch, streaming and event-driven ingestion and orchestration patterns with AWS Glue, Lambda, Step Functions, SQS, EventBridge, Amazon Kinesis and Apache Kafka, including dependency handling, retries and controlled recovery for failed or overlapping pipeline runs."
  },
  {
   "id": 53,
   "section": "story",
-  "role": "Tech Detectives Inc.",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Tech Detectives Inc.: Migrated legacy SQL Server/SSIS reporting to CDC into S3, Iceberg and Athena with Step Functions orchestration; refresh window went from 18 hours to 2 hours."
+  "text": "At US Bank: Developed PySpark and SQL transformations across raw, staging and curated layers, covering incremental processing, fact and dimension modeling, data quality checks, reconciliation and business-rule implementation."
  },
  {
   "id": 54,
   "section": "story",
-  "role": "Triangulum Insights",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Triangulum Insights: Developed and maintained an AWS-based advertising and consumer panel-data platform using S3, AWS Glue, Step Functions, Lambda and Amazon Redshift to move source data from landing through reporting-ready warehouse structures."
+  "text": "At US Bank: Supported queue-backed file processing in which incoming source files were routed to source-specific Glue workloads and downstream fact processing ran only after required feeds completed successfully."
  },
  {
   "id": 55,
   "section": "story",
-  "role": "Triangulum Insights",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Triangulum Insights: Translated reporting-team grain, source and refresh requirements into Redshift table designs and supporting Glue and Step Functions pipelines, aligning warehouse structures to downstream Tableau reporting needs."
+  "text": "At US Bank: Modernized legacy SQL Server and SSIS reporting workflows by moving CDC data into S3, Iceberg and Athena and orchestrating dependent transformations with Step Functions, reducing the reported refresh window from 18 hours to 2 hours."
  },
  {
   "id": 56,
   "section": "story",
-  "role": "Triangulum Insights",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Triangulum Insights: Cut the daily refresh of the 15-table Redshift gold layer behind Tableau reporting, 100–450M rows per table, from 3 hours to 20 minutes by replacing full reloads with incremental loads and business-key deduplication."
+  "text": "At US Bank: Improved a Snowflake security workload of approximately 17B rows by identifying repeated raw-table scans and semi-structured attribute parsing as the primary bottleneck, then moving frequently queried attributes into incrementally refreshed relational structures; reported query time fell by approximately 70–80%."
  },
  {
   "id": 57,
   "section": "story",
-  "role": "Triangulum Insights",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Triangulum Insights: Applied business-key and ingestion-order deduplication to merge new partitions into the existing reporting set while retaining the most recent valid record for downstream analytics."
+  "text": "At US Bank: Maintained Airflow/MWAA and dbt transformation workflows for analytics pipelines, including dependency management, incremental models, source freshness checks and controlled promotion across environments."
  },
  {
   "id": 58,
   "section": "story",
-  "role": "Triangulum Insights",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Triangulum Insights: Handled pipeline and source-data failures by isolating malformed files, correcting schema drift and metadata issues, and reprocessing only affected inputs instead of restarting complete loads."
+  "text": "At US Bank: Standardized external-data ingestion from SaaS platforms and APIs using reusable landing, watermarking and transformation patterns, with Athena or Glue preparing analytics-ready datasets for downstream reporting and marketing integrations."
  },
  {
   "id": 59,
   "section": "story",
-  "role": "Triangulum Insights",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Triangulum Insights: Investigated long-running Redshift procedures and workload-management pressure using system diagnostics, then adjusted execution sequencing and materialized-view refresh behavior around observed workload patterns."
+  "text": "At US Bank: Compared Redshift Serverless and Snowflake across 20+ source databases against reporting and integration requirements."
  },
  {
   "id": 60,
   "section": "story",
-  "role": "Triangulum Insights",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Triangulum Insights: Automated external data intake with Python and API-based integrations, normalizing incoming reporting and CRM data into S3 and Redshift for scheduled warehouse processing."
+  "text": "At US Bank: Enterprise modernization project = the legacy SQL Server and SSIS reporting moved into an AWS S3 data lake (Iceberg tables, Athena) (18 hours to 2 hours): 67 tables, about 1 TB. Not the warehouse comparison."
  },
  {
   "id": 61,
   "section": "story",
-  "role": "Triangulum Insights",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Triangulum Insights: Delivered curated Redshift datasets to Tableau consumers and supported more than 50 Salesforce Marketing Cloud automations for scheduled refreshes, query activities and campaign sends."
+  "text": "At US Bank: Managed platform reliability and governance through CloudWatch and Datadog monitoring, Terraform and AWS CDK infrastructure, IAM/KMS controls, lineage and freshness checks, and restricted handling of PII using controlled identifiers and access patterns."
  },
  {
   "id": 62,
   "section": "story",
-  "role": "Mindtree",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Mindtree: Developed and supported SSIS batch integrations that moved healthcare data from source systems through SQL Server raw and staging layers into standardized reporting tables and views."
+  "text": "At US Bank: Embedded AI-assisted ETL coverage validation into pull-request approvals: GitHub Actions triggers AWS Lambda and the enterprise Claude API to trace raw-to-curated pipeline coverage and flag potential data-loss gaps before release."
  },
  {
   "id": 63,
   "section": "story",
-  "role": "Mindtree",
+  "role": "US Bank",
   "kind": "story",
-  "text": "At Mindtree: Wrote SQL Server joins, stored procedures, staging logic and scheduled transformations supporting data movement from raw through published reporting layers."
+  "text": "At US Bank: Configured Snowflake MCP servers and delivered a business-facing chatbot for governed data access, reducing ad hoc engineering requests and shortening turnaround for day-to-day data questions."
  },
  {
   "id": 64,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: File-processing architecture (event-driven, on AWS): SQS queues buffer incoming source files; Step Functions route each file to a source-specific Glue job; a completion gate holds downstream fact loads until every required feed has landed, so facts are never built on a partial day."
+ },
+ {
+  "id": 65,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: Cut query time 70–80% on a 17B-row Snowflake security-event workload after tracing the bottleneck to repeated raw-table scans and semi-structured attribute parsing; moved high-use attributes into incrementally refreshed relational structures."
+ },
+ {
+  "id": 66,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: Migrated legacy SQL Server/SSIS reporting to CDC into S3, Iceberg and Athena with Step Functions orchestration; refresh window went from 18 hours to 2 hours."
+ },
+ {
+  "id": 67,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: Handled on-call for the team's production AWS and Snowflake pipelines: triaged CloudWatch and Datadog alerts, troubleshot failed Glue, Step Functions and Snowflake loads to root cause, reran only the affected data and kept downstream users informed until it was fixed."
+ },
+ {
+  "id": 68,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: Worked directly with cross-functional analysts and business stakeholders: gathered reporting requirements, set priorities with them, and communicated delivery status, incidents and trade-offs."
+ },
+ {
+  "id": 69,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: Documented the AWS and Snowflake architecture, pipeline data flows, data models and production support procedures."
+ },
+ {
+  "id": 70,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: On-call load: at least 1–2 requests a day (no exact count); typical time to fix was 2–3 hours, depending on the root cause."
+ },
+ {
+  "id": 71,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: dbt: two dbt projects of about 150 models each (150-model): one on Snowflake, one on Redshift orchestrated by Airflow."
+ },
+ {
+  "id": 72,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: The dbt projects enforced a medallion (bronze, silver, gold) architecture."
+ },
+ {
+  "id": 73,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: The 17B-row Snowflake fix took average query time from 8 minutes to 1–2 minutes."
+ },
+ {
+  "id": 74,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: Warehouse assessment outcome: recommended Snowflake because the client used Sigma; after the recommendation I did the data modeling and built their dbt models on Snowflake."
+ },
+ {
+  "id": 75,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: The Snowflake MCP chatbot cut ad hoc data questions from business users from about 10 a week to 2 a week."
+ },
+ {
+  "id": 76,
+  "section": "story",
+  "role": "US Bank",
+  "kind": "story",
+  "text": "At US Bank: AI-assisted ETL coverage check, in detail: code is promoted dev → stg → prod through repo branches. When a pull request is raised for stg, the check runs an ETL coverage analysis on dev, attaches the report as a comment on the PR, and flags the PR for evaluation if coverage is below 90%."
+ },
+ {
+  "id": 77,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Developed and maintained an AWS-based advertising and consumer panel-data platform using S3, AWS Glue, Step Functions, Lambda and Amazon Redshift to move source data from landing through reporting-ready warehouse structures."
+ },
+ {
+  "id": 78,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Translated reporting-team grain, source and refresh requirements into Redshift table designs and supporting Glue and Step Functions pipelines, aligning warehouse structures to downstream Tableau reporting needs."
+ },
+ {
+  "id": 79,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Gold layer: about 15 Redshift reporting tables, each roughly 100–450M rows."
+ },
+ {
+  "id": 80,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: The gold layer's daily refresh dropped from 3 hours to 20 minutes."
+ },
+ {
+  "id": 81,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Converted the 450M-row reporting table refreshes from truncate-and-reload to incremental insert-or-update (upsert) loads."
+ },
+ {
+  "id": 82,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Managed Redshift reporting tables containing approximately 450M records each, using incremental stored-procedure processing and sequenced warehouse loads to refresh large datasets without full reloads."
+ },
+ {
+  "id": 83,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Applied business-key and ingestion-order deduplication to merge new partitions into the existing reporting set while retaining the most recent valid record for downstream analytics."
+ },
+ {
+  "id": 84,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Handled pipeline and source-data failures by isolating malformed files, correcting schema drift and metadata issues, and reprocessing only affected inputs instead of restarting complete loads."
+ },
+ {
+  "id": 85,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Investigated long-running Redshift procedures and workload-management pressure using system diagnostics, then adjusted execution sequencing and materialized-view refresh behavior around observed workload patterns."
+ },
+ {
+  "id": 86,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Automated external data intake with Python and API-based integrations, normalizing incoming reporting and CRM data into S3 and Redshift for scheduled warehouse processing."
+ },
+ {
+  "id": 87,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Delivered curated Redshift datasets to Tableau consumers and supported more than 50 Salesforce Marketing Cloud automations for scheduled refreshes, query activities and campaign sends."
+ },
+ {
+  "id": 88,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Worked with reporting-team stakeholders on grain, source and refresh requirements and kept them informed about data issues and reprocessing."
+ },
+ {
+  "id": 89,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Troubleshot production pipeline failures to root cause (malformed files, schema drift, metadata issues) and performance-tuned long-running Redshift procedures."
+ },
+ {
+  "id": 90,
+  "section": "story",
+  "role": "Capgemini",
+  "kind": "story",
+  "text": "At Capgemini: Documented the Redshift table designs, pipeline architecture and load schedules for the reporting team."
+ },
+ {
+  "id": 91,
+  "section": "story",
+  "role": "Mindtree",
+  "kind": "story",
+  "text": "At Mindtree: Developed and supported SSIS batch integrations that moved 1–2 million (1–2M) rows of healthcare data a night from at least 30 (30+) source systems through SQL Server raw and staging layers into standardized reporting tables and views."
+ },
+ {
+  "id": 92,
+  "section": "story",
+  "role": "Mindtree",
+  "kind": "story",
+  "text": "At Mindtree: Designed and developed SQL stored procedures, joins, staging logic and scheduled transformations supporting data movement from raw through published reporting layers."
+ },
+ {
+  "id": 93,
   "section": "story",
   "role": "Mindtree",
   "kind": "story",
   "text": "At Mindtree: Validated scheduled batch outputs through source-to-target row counts and reconciliation checks, investigating missing records, duplicates and data-type conflicts before publication."
  },
  {
-  "id": 65,
+  "id": 94,
   "section": "story",
   "role": "Mindtree",
   "kind": "story",
-  "text": "At Mindtree: Translated healthcare retention requirements for records older than 10 years into repeatable archival workflows, including AWS-based archival design for historical data."
+  "text": "At Mindtree: Was part of the team that set up the HIPAA- and GDPR-aligned data retention pipeline for the healthcare databases: it removed records past the retention window from the source systems (AWS-based archival design for historical data) and retained at least 100 million rows (100M+) per healthcare database."
  },
  {
-  "id": 66,
+  "id": 95,
+  "section": "story",
+  "role": "Mindtree",
+  "kind": "story",
+  "text": "At Mindtree: Discussed the retention business rules and policies with business stakeholders: which records they wanted retained over 10 years."
+ },
+ {
+  "id": 96,
   "section": "story",
   "role": "Mindtree",
   "kind": "story",
   "text": "At Mindtree: Supported nightly production schedules through controlled restarts and source-delay escalation while applying HIPAA-aligned PHI/PII masking, exclusion and access controls."
  },
  {
-  "id": 67,
+  "id": 97,
+  "section": "story",
+  "role": "Mindtree",
+  "kind": "story",
+  "text": "At Mindtree: Provided production support for the 15–20 SSIS packages that ran nightly and their SQL Server schedules: troubleshot failed jobs to root cause, restarted them in a controlled way and escalated source-system delays to upstream teams."
+ },
+ {
+  "id": 98,
+  "section": "story",
+  "role": "Mindtree",
+  "kind": "story",
+  "text": "At Mindtree: Documented SSIS package designs, source-to-target mappings and nightly support procedures for the healthcare workflows."
+ },
+ {
+  "id": 99,
+  "section": "story",
+  "role": "Mindtree",
+  "kind": "story",
+  "text": "At Mindtree: Trained in data engineering and SQL Server Integration Services (SSIS) as a software engineer trainee, then moved into the Data Engineer role at Mindtree in January 2020."
+ },
+ {
+  "id": 100,
+  "section": "story",
+  "role": "Mindtree",
+  "kind": "story",
+  "text": "At Mindtree: During the internship: on-call monitoring, production support and change request (CR) resolutions."
+ },
+ {
+  "id": 101,
   "section": "story",
   "role": "Mindtree",
   "kind": "story",
   "text": "At Mindtree: Resolved workstation, application and network incidents for office users, covering endpoint, connectivity and access-related issues."
  },
  {
-  "id": 68,
+  "id": 102,
   "section": "story",
   "role": "Mindtree",
   "kind": "story",
   "text": "At Mindtree: Administered Active Directory accounts, group memberships and permissions and supported scheduled endpoint patching and antivirus updates."
  },
  {
-  "id": 69,
+  "id": 103,
   "section": "story",
   "role": "Mindtree",
   "kind": "story",
   "text": "At Mindtree: Delivered security-awareness guidance on phishing prevention and multi-factor authentication as part of routine user support."
  },
  {
-  "id": 70,
+  "id": 104,
   "section": "skills",
   "role": "defendable",
   "kind": "skills",
-  "text": "Skills I can defend in an interview: Glue, Lambda, Step Functions, S3, Redshift, Redshift Data API, Athena, Glue Data Catalog, AppFlow, EventBridge, SQS, SNS, DMS, Aurora, DynamoDB, IAM, KMS, CloudWatch, Secrets Manager, AWS CDK, Snowflake, Amazon Redshift, PostgreSQL, SQL Server, Oracle, DB2, Apache Iceberg, SQL, Python, PySpark, Spark, Snowpark, ETL/ELT, data warehousing, dbt, Jinja, SSIS, Airflow/MWAA, Fivetran, Snowflake Openflow, Informatica, CDC, incremental models, dimensional modeling, star schemas, window functions, data quality checks, Apache Kafka, Amazon Kinesis, streaming pipelines, REST APIs, GraphQL, SFTP, SaaS ingestion, AWS DMS, AppFlow, event-driven pipelines, batch pipelines, API-driven ingestion, Terraform, Docker, Kubernetes, GitHub Actions, Bitbucket, CI/CD, Snyk, Datadog, PagerDuty, CloudWatch monitoring, Snowflake Cortex (LLM functions), Claude and GPT APIs for data workflows, LLM-assisted data quality and documentation, prompt-driven SQL generation, Snowflake RBAC, AWS IAM, KMS encryption, least-privilege access, PHI/PII handling, data masking, lineage, freshness monitoring, Sigma, Tableau, Power BI, Streamlit, Power Query, Salesforce Marketing Cloud"
+  "text": "Skills I can defend in an interview: Glue, Lambda, Step Functions, S3, Redshift, Redshift Data API, Athena, Glue Data Catalog, AppFlow, EventBridge, SQS, SNS, DMS, Aurora, DynamoDB, IAM, KMS, CloudWatch, Secrets Manager, AWS CDK, Snowflake, Amazon Redshift, PostgreSQL, SQL Server, Oracle, DB2, Apache Iceberg, SQL, Python, PySpark, Spark, Snowpark, ETL/ELT, data warehousing, dbt, Jinja, SSIS, Airflow/MWAA, Fivetran, Snowflake Openflow, Informatica, CDC, incremental models, dimensional modeling, star schemas, window functions, data quality checks, Apache Kafka, Amazon Kinesis, streaming pipelines, REST APIs, GraphQL, SFTP, SaaS ingestion, AWS DMS, AppFlow, event-driven pipelines, batch pipelines, API-driven ingestion, Terraform, Docker, Kubernetes, GitHub Actions, Bitbucket, CI/CD, Snyk, Datadog, PagerDuty, CloudWatch monitoring, Snowflake Cortex (LLM functions), Claude and GPT APIs for data workflows, LLM-assisted data quality and documentation, prompt-driven SQL generation, Snowflake RBAC, AWS IAM, KMS encryption, least-privilege access, HIPAA, GDPR, CCPA, PHI/PII handling, data masking, lineage, freshness monitoring, Sigma, Tableau, Power BI, Streamlit, Power Query, Salesforce Marketing Cloud, production support, on-call, troubleshooting, root-cause analysis, performance tuning, stakeholder communication, requirements gathering, cross-functional collaboration, team leadership, technical documentation"
  },
  {
-  "id": 71,
+  "id": 105,
   "section": "projects",
   "role": "JobHub",
   "kind": "project",

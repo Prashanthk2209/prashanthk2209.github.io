@@ -35,7 +35,7 @@ Decisions made while building the static portfolio (Phase 4). Written 2026-10-14
   cap, 23 modules / about 8,300 lines, 462-application outcome analysis, 59,946 USCIS employers,
   682 of 1,085 matched, about 5,000 companies harvested).
 - "Availability: 2 weeks after offer" and "remote or hybrid, open to relocation" come from `profile.json`.
-- Not invented: company locations for Triangulum Insights and Mindtree (left blank and hidden), the
+- Not invented: company locations for Mindtree (left blank and hidden), the
   B.Tech location, GitHub URL, awards (none, so the Achievements section is certifications plus results).
 - Visa status and salary expectations are intentionally not on the site. The JobHub case study mentions
   the USCIS sponsorship signal as a data feature only.

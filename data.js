@@ -7,7 +7,7 @@ window.PORTFOLIO = {
   meta: {
     siteTitle: "Prashanth Kumar Sirusala | Data Engineer",
     description:
-      "Data Engineer in Miami, FL with 5+ years on AWS, Snowflake and Redshift. Took average query time on a 17B-row Snowflake workload from 8 minutes to 1-2, cut an 18-hour refresh to 2 hours, and put Claude-based data-loss checks into CI.",
+      "Data Engineer in Miami, FL with around 6 years on AWS, Snowflake and Redshift. Took average query time on a 17B-row Snowflake workload from 8 minutes to 1-2, cut an 18-hour refresh to 2 hours, and put Claude-based data-loss checks into CI.",
     // Replace with the final URL once deployed (see DEPLOY.md).
     canonical: "https://prashanthk2209.github.io/",
     ogImage: "og.png"
@@ -19,7 +19,7 @@ window.PORTFOLIO = {
     role: "Data Engineer",
     headline: "Data Engineer building cloud data platforms with security built in and AI in the loop.",
     intro: [
-      "5+ years on AWS, Snowflake and Redshift for healthcare, security-event and ad-tech data; owns pipelines end to end, from ingestion and modeling to orchestration, monitoring and governance.",
+      "Around 6 years on AWS, Snowflake and Redshift for healthcare, security-event and ad-tech data; owns pipelines end to end, from ingestion and modeling to orchestration, monitoring and governance.",
       "Took average query time on a 17-billion-row Snowflake workload from 8 minutes to 1-2, cut an 18-hour reporting refresh to 2 hours, and put Claude-based data-loss checks into CI."
     ],
     location: "Miami, FL",
@@ -38,13 +38,13 @@ window.PORTFOLIO = {
   about: {
     heading: "About",
     paragraphs: [
-      "I build and run data platforms on AWS and Snowflake: batch, streaming, event-driven and CDC pipelines, dimensional models, orchestration, monitoring and governance. Over 5+ years I have worked on healthcare data, security-event analytics and advertising panel data, moving from SSIS and SQL Server to Glue, Step Functions, Iceberg, Athena, Redshift and Snowflake.",
+      "I build and run data platforms on AWS and Snowflake: batch, streaming, event-driven and CDC pipelines, dimensional models, orchestration, monitoring and governance. Over about 6 years I have worked on healthcare data, security-event analytics and advertising panel data, moving from SSIS and SQL Server to Glue, Step Functions, Iceberg, Athena, Redshift and Snowflake.",
       "Security is part of how I design, not an afterthought. I hold an M.S. in Cybersecurity from Florida International University, CompTIA Security+ and the AWS Certified Solutions Architect - Associate certification, and I apply them day to day through IAM and KMS controls, Snowflake RBAC, least-privilege access, HIPAA-aligned PHI/PII masking and lineage.",
       "I also build with LLMs where they earn their place: Claude API checks in CI that trace raw-to-curated coverage before release, Snowflake MCP servers behind a chatbot over governed data, and JobHub, an agentic job-search system I wrote in Python standard library with Claude Code browser agents."
     ],
     facts: [
       { icon: "map-pin", label: "Location", value: "Miami, FL (remote or hybrid)" },
-      { icon: "briefcase", label: "Experience", value: "5+ years in data engineering" },
+      { icon: "briefcase", label: "Experience", value: "~6 years in data engineering" },
       { icon: "graduation-cap", label: "Education", value: "M.S. Cybersecurity, FIU" },
       { icon: "shield-check", label: "Certifications", value: "AWS SAA, CompTIA Security+" },
       { icon: "calendar-check", label: "Availability", value: "2 weeks after offer" }
@@ -260,7 +260,7 @@ window.PORTFOLIO = {
     roles: [
       {
         title: "Data Engineer",
-        company: "Tech Detectives Inc.",
+        company: "US Bank",
         location: "Miami, FL",
         start: "Feb 2025",
         end: "Present",
@@ -281,8 +281,8 @@ window.PORTFOLIO = {
       },
       {
         title: "Data Engineer",
-        company: "Triangulum Insights",
-        location: "",
+        company: "Capgemini",
+        location: "Remote",
         start: "Jan 2024",
         end: "Feb 2025",
         summary: "Built and ran the AWS and Redshift platform for an advertising and consumer panel-data business.",

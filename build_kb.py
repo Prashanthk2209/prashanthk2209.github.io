@@ -13,7 +13,7 @@ def add(section, role, text, kind="fact"):
 c = resume["contact"]
 add("profile", "", "I am %s, a %s based in %s." % (resume["name"].title(), resume["headline"], c.get("location", "Miami, FL")))
 add("profile", "", "You can reach me by email at %s, by phone at %s, or on LinkedIn at %s." % (c["email"], c["phone"], c.get("linkedin", "linkedin.com/in/psirusala")), "contact")
-add("profile", "", "I have about 5 years of data engineering experience: Mindtree (2020 to 2022), Triangulum Insights (2024 to 2025) and Tech Detectives (2025 to present), with an M.S. in Cybersecurity at Florida International University in between.", "years")
+add("profile", "", "I have around 6 years of data engineering experience: Mindtree (2019 to 2022, starting as an intern), Capgemini (2024 to 2025) and US Bank (2025 to present), with an M.S. in Cybersecurity at Florida International University in between.", "years")
 add("profile", "", "I work remote or hybrid and I am open to relocation for the right role. I can start two weeks after an offer.", "availability")
 add("profile", "", "I am looking for Senior Data Engineer roles, and also Cloud Data Architect, Solutions or Forward Deployed Engineer, AI platform and cloud security work.", "goals")
 for cat in resume["skills"]:
@@ -36,7 +36,12 @@ for line in story.splitlines():
         role = "skills"; continue
     s = line.strip()
     if s.startswith("- ") and role and role != "skills":
-        add("story", role, "At %s: %s" % (role, s[2:]), "story")
+        fact, i = s[2:], s[2:].find(" (user, ")
+        if i >= 0:                                                # dated notes to JobHub are not site copy
+            fact = fact[:i] + fact[fact.find(")", i) + 1:]
+        if "Context only" in fact or "Tech Detectives" in fact:   # context-only numbers and the employer-of-record line stay off the site
+            continue
+        add("story", role, "At %s: %s" % (role, fact), "story")
     elif role == "skills" and s and not s.startswith("<!--") and not s.startswith("#"):
         add("skills", "defendable", "Skills I can defend in an interview: " + s, "skills")
 # JobHub, from the portfolio project copy (facts already on the site)

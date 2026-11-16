@@ -126,7 +126,7 @@
   }
 
   /* ---------- turning passages into first-person sentences ---------- */
-  var COMPANY_SHORT = { 'Tech Detectives Inc.': 'Tech Detectives', 'Triangulum Insights': 'Triangulum', 'Mindtree': 'Mindtree' };
+  var COMPANY_SHORT = { 'US Bank': 'US Bank', 'Capgemini': 'Capgemini', 'Mindtree': 'Mindtree' };
   var PRESENT = /^(Own|Write|Maintain|Manage|Monitor|Run|Support|Build|Handle|Lead|Design|Develop|Operate|Provision|Release)\b/;
   function sentence(c, withCompany) {
     var m = /^At ([^:]+): (.*)$/.exec(c.text), company = m ? (COMPANY_SHORT[m[1]] || m[1]) : '', body = m ? m[2] : c.text;
@@ -163,7 +163,7 @@
   function companyOf(c) { var m = /^At ([^:]+):/.exec(c.text); return m ? (COMPANY_SHORT[m[1]] || m[1]) : ''; }
 
   function roleSentence(r, lead) {
-    // "Data Engineer at Tech Detectives Inc., Miami, FL, February 2025 – Present." -> "I'm a Data Engineer at Tech Detectives in Miami, since February 2025."
+    // "Data Engineer at US Bank, Miami, FL, February 2025 – Present." -> "I'm a Data Engineer at US Bank in Miami, since February 2025."
     var m = /^(.+?) at (.+?)(?:, ([^,]+, [A-Z]{2}|Remote|India))?, (\w+ \d{4}) – (\w+ \d{4}|Present)\.?$/.exec(r.text);
     if (!m) { return lead + ' ' + r.text; }
     var art = /^[aeiou]/i.test(m[1]) || /^SSIS/.test(m[1]) ? 'an' : 'a', co = COMPANY_SHORT[m[2]] || m[2];
@@ -184,7 +184,7 @@
     { rx: /\b(how are you|how('s| is) it going|how are things|how do you do|what's up|whats up|how have you been)\b/i, text: "Doing well, thanks for asking. I'm a data engineer in Miami, and I'm happy to talk through anything on my resume. What would you like to know?" },
     { rx: /\b(are you there|can you hear me|you there|hear me|is this working|testing|test test|hello\?)\b/i, text: "I'm here and I can hear you. Go ahead and ask." },
     { rx: /\b(who (is this|am i (talking|speaking) (to|with))|what are you|are you (a bot|an ai|a robot|real|human))\b/i, text: "I'm a voice assistant on Prashanth Kumar Sirusala's portfolio, speaking for him from his resume and work history. Nothing I say goes beyond what is on record." },
-    { rx: /\b(what can you (do|tell me|answer)|help me|how does this work|what should i ask)\b/i, text: "Ask me about my roles at Tech Detectives, Triangulum and Mindtree, the 17 billion row Snowflake work, the AWS pipelines, how I use AI, JobHub, my education and certifications, or how to contact me." },
+    { rx: /\b(what can you (do|tell me|answer)|help me|how does this work|what should i ask)\b/i, text: "Ask me about my roles at US Bank, Capgemini and Mindtree, the 17 billion row Snowflake work, the AWS pipelines, how I use AI, JobHub, my education and certifications, or how to contact me." },
     { rx: /\b(thank you|thanks|thank u|appreciate it|cheers)\b/i, text: "You're welcome. If you want to take this further, my email is prashanthsirusala2209@gmail.com." },
     { rx: /\b(bye|goodbye|see you|talk later|that's all|thats all|i'm done|im done|stop)\b/i, text: "Thanks for stopping by. My email and LinkedIn are at the bottom of the page whenever you're ready." },
     { rx: /\b(nice to meet you|pleasure|good to meet)\b/i, text: "Likewise. What would you like to know about my work?" }
@@ -199,8 +199,8 @@
       } },
     { rx: /\b(who are you|about you|introduce|yourself|what do you do|tell me about you)\b/i, topic: 'my background', run: function () {
         // A spoken pitch, not a resume readout: who, what, three results, what sets him apart. Every fact is in kb.js.
-        return "I'm Prashanth, a data engineer in Miami with about five years of building data platforms on AWS and Snowflake. " +
-          'At Tech Detectives, I made a 17 billion row Snowflake workload 70 to 80 percent faster, and cut an 18 hour reporting refresh down to 2 hours. ' +
+        return "I'm Prashanth, a data engineer in Miami with around six years of building data platforms on AWS and Snowflake. " +
+          'At US Bank, I made a 17 billion row Snowflake workload 70 to 80 percent faster, and cut an 18 hour reporting refresh down to 2 hours. ' +
           'I also put Claude into our pull request checks, so data-loss gaps get caught before release. ' +
           "And with a master's in cybersecurity, security is built into how I design pipelines.";
       } },
@@ -218,7 +218,7 @@
     { rx: /\b(education|degree|university|college|school|master|bachelor|study|studied)\b/i, topic: 'my education', run: function () {
         var e = byKind('education'); return 'I have ' + e.map(function (c) { return c.text.replace(/\.$/, ''); }).join(', and before that ') + '. The master\'s is why security shows up in how I design pipelines.';
       } },
-    { rx: /\b(current (role|job|company|position)|where do you work|work now|present role|right now)\b/i, topic: 'my current role at Tech Detectives', run: function () {
+    { rx: /\b(current (role|job|company|position)|where do you work|work now|present role|right now)\b/i, topic: 'my current role at US Bank', run: function () {
         var r = byKind('role')[0], b = KB.filter(function (c) { return c.kind === 'bullet' && c.role === r.role; }).slice(0, 2);
         return roleSentence(r, "I'm") + ' ' + joinProse(b, false);
       } },
@@ -226,19 +226,19 @@
     { rx: /\b(why (should we|hire)|strengths?|pitch|sell yourself|what makes you|stand out|best at|good at)\b/i, run: function () {
         return 'Three things. I ship measurable results: I made a 17 billion row Snowflake workload 70 to 80 percent faster, and cut an 18 hour reporting refresh to 2 hours. I bring security with me, with an M.S. in Cybersecurity, Security+ and the AWS Solutions Architect certification. And I use AI where it earns its place, from Claude-based checks in CI to the agents that run JobHub.';
       } },
-    { rx: /\b(tech detectives|triangulum|mindtree)\b/i, run: function (q) {
-        var name = /tech detectives/i.test(q) ? 'Tech Detectives' : /triangulum/i.test(q) ? 'Triangulum' : 'Mindtree';
+    { rx: /\b(us bank|u.s. bank|capgemini|mindtree)\b/i, run: function (q) {
+        var name = /bank/i.test(q) ? 'US Bank' : /capgemini/i.test(q) ? 'Capgemini' : 'Mindtree';
         var role = KB.filter(function (c) { return c.kind === 'role' && c.role.indexOf(name) === 0; })[0];
         var bullets = KB.filter(function (c) { return c.kind === 'bullet' && c.role.indexOf(name) === 0; });
         bullets.sort(function (a, b) { return (OUTCOME.test(b.text) ? 1 : 0) - (OUTCOME.test(a.text) ? 1 : 0); });
-        memory.entity = name; return (role ? roleSentence(role, name === 'Tech Detectives' ? "I'm" : 'I was') + ' ' : '') + joinProse(bullets.slice(0, 3), false);
+        memory.entity = name; return (role ? roleSentence(role, name === 'US Bank' ? "I'm" : 'I was') + ' ' : '') + joinProse(bullets.slice(0, 3), false);
       } }
   ];
   var OFF_LIMITS = /\b(visa|sponsor|sponsorship|h-?1b|salary|compensation|pay|rate|how much do you (make|earn)|date of birth|birthday|age|home address|ssn|social security)\b/i;
   function contactEmail() { var m = /([\w.+-]+@[\w-]+\.[\w.]+)/.exec((byKind('contact')[0] || {}).text || ''); return m ? m[1] : 'prashanthsirusala2209@gmail.com'; }
 
   var memory = { topic: '', entity: '' };
-  var ENTITY_RX = /\b(jobhub|snowflake|redshift|aws|kafka|kinesis|dbt|airflow|terraform|glue|athena|iceberg|ssis|sql server|tableau|mindtree|triangulum|tech detectives|fiu|cybersecurity|claude|mcp|chatbot|hipaa|healthcare)\b/i;
+  var ENTITY_RX = /\b(jobhub|snowflake|redshift|aws|kafka|kinesis|dbt|airflow|terraform|glue|athena|iceberg|ssis|sql server|tableau|mindtree|capgemini|us bank|fiu|cybersecurity|claude|mcp|chatbot|hipaa|healthcare)\b/i;
   function remember(q, text, topic) {
     var m = ENTITY_RX.exec(q);
     memory.entity = topic || (m ? m[0] : (ENTITY_RX.exec(text) || [memory.entity])[0]) || '';
